@@ -1,0 +1,35 @@
+{
+  "name": "js_model",
+  "version": "0.0.1",
+  "description": "A simple ES6 model class.",
+  "main": "src/Model.js",
+  "scripts": {
+    "test": "./node_modules/mocha/bin/mocha -u 'tdd'",
+    "pretest": "./node_modules/rollup/bin/rollup -c"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://20TRIES@github.com/20TRIES/JsModel.git"
+  },
+  "keywords": [
+    "Model",
+    "Js",
+    "es6"
+  ],
+  "author": "Marcus T",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/20TRIES/JsModel/issues"
+  },
+  "homepage": "https://github.com/20TRIES/JsModel#readme",
+  "dependencies": {
+    "js_collection": "0.0.*"
+  },
+  "devDependencies": {
+    "mocha": "^2.5.*",
+    "chai": "^3.5.*",
+    "rollup": "^0.31.*",
+    "rollup-plugin-buble": "0.11.*",
+    "rollup-plugin-npm": "1.4.*"
+  }
+}
