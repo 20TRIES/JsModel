@@ -98,7 +98,7 @@ export default class Model {
      * @returns {*}
      */
     newCollection(data) {
-        return new Collection(this.primary_key, data);
+        return new Collection(data, this.primary_key);
     }
 
     /**
