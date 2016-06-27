@@ -1,3 +1,7 @@
+import Collection from 'js_collection';
+
+let jQuery = require('jquery');
+
 /**
  * A builder class for building query strings for a Filterable API.
  */
@@ -38,7 +42,7 @@ export default class Builder {
     get(success, error) {
         var instance = this;
 
-        $.ajax({
+        jQuery.ajax({
             headers:  { Accept: "application/json" },
             dataType: 'json',
             method: 'GET',
@@ -154,7 +158,7 @@ export default class Builder {
      */
     update(attributes, success, error) {
         var instance = this;
-        $.ajax({
+        jQuery.ajax({
             headers:  { Accept: "application/json" },
             dataType: 'json',
             method: 'POST',
@@ -193,7 +197,7 @@ export default class Builder {
      */
     insert(attributes, success, error) {
         var instance = this;
-        $.ajax({
+        jQuery.ajax({
             headers:  { Accept: "application/json" },
             dataType: 'json',
             method: 'POST',
@@ -231,7 +235,7 @@ export default class Builder {
      */
     delete(success, error) {
         var instance = this;
-        $.ajax({
+        jQuery.ajax({
             headers:  { Accept: "application/json" },
             dataType: 'json',
             method: 'POST',
