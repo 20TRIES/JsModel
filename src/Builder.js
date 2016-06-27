@@ -16,6 +16,15 @@ export default class Builder {
         this.conditions = {
             "wheres": [],
         };
+        this.appends = new Collection([], 'name');
+    }
+
+    /**
+     * Appends a variable to the query url string.
+     */
+    append(name, value) {
+        this.appends.push({'name': name, 'value': value});
+        return this;
     }
 
     /**
@@ -90,7 +99,7 @@ export default class Builder {
             else {
                 for (var key in data) {
                     if (data.hasOwnProperty(key)) {
-                        flashError($(data).attr(key));
+                        flashError(jQuery(data).attr(key));
                     }
                 }
             }
@@ -105,21 +114,21 @@ export default class Builder {
      * @returns {string}
      */
     toQueryString() {
-        var query_string = '';
+        let query_string = '';
+        let first = true;
 
-        var first = true;
-
-        for(var key in this.conditions.wheres) {
-            var where = this.conditions.wheres[key];
-
+        for(let i=0; i < this.conditions.wheres.length; ++i) {
+            let where = this.conditions.wheres[i];
             query_string += (first ? '?' : '&');
-
             query_string += 'filters[' + where.attribute + '][]=' + encodeURIComponent(where.value);
-
-            if(first == true) {
-                first = false;
-            }
+            first = first !== true;
         }
+
+        this.appends.each((key, item) => {
+            query_string += (first ? '?' : '&');
+            query_string += `${item.name}=` + encodeURIComponent(item.value);
+            first = first !== true;
+        }, query_string);
 
         return query_string;
     }
@@ -233,7 +242,7 @@ export default class Builder {
      * @param {function} success
      * @param {function} error
      */
-    delete(success, error) {
+    deleteResults(success, error) {
         var instance = this;
         jQuery.ajax({
             headers:  { Accept: "application/json" },
