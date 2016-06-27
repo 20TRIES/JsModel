@@ -59,7 +59,7 @@ export default class Builder {
                     }
                 },
                 200: function (payload) {
-                    var data = instance.encapsulateData(payload['results']);
+                    var data = instance.encapsulateData(payload['data']);
                     success(instance.model.newCollection(data), payload);
                 }
             }
@@ -177,7 +177,7 @@ export default class Builder {
                 },
                 200: function (payload) {
                     if(typeof success == 'function') {
-                        var data = instance.encapsulateData(payload['results']);
+                        var data = instance.encapsulateData(payload['data']);
                         success(instance.model.newCollection(data), payload);
                     }
                 }
