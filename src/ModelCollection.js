@@ -1,4 +1,5 @@
 import Collection from "js_collection";
+import MissingQueryBuilderException from "./MissingQueryBuilderException";
 
 /**
  * A base Model collection class.
@@ -28,5 +29,25 @@ export default class ModelCollection extends Collection
     setQuery(query)
     {
         this.query = query;
+    }
+
+    /**
+     * Loads the next page of results into the collection.
+     *
+     * Requires a builder to be set which is responsible for the collection.
+     */
+    loadNextPage()
+    {
+        if(this.query != null && this.query.getLimit() !== -1) {
+            let instance = this;
+            this.query.incrementPage();
+            this.query.get((results) => {
+                instance.merge(results);
+            },() => {
+                instance.query.decrementPage();
+            });
+        } else {
+            throw new MissingQueryBuilderException('Cannot load next page; no query builder set for model collection!');
+        }
     }
 }
