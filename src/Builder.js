@@ -1,3 +1,4 @@
+import ModelCollection from './ModelCollection';
 import Collection from 'js_collection';
 import DuplicateVariableException from "../src/DuplicateVariableException";
 import UnknownVariableException from "../src/UnknownVariableException";
@@ -192,7 +193,7 @@ export default class Builder
                 },
                 200: function (payload) {
                     var models = instance.encapsulateData(payload['data']);
-                    let collection = instance.model.newCollection(models);
+                    let collection = instance._collectData(models);
                     success(collection, payload);
                 }
             }
@@ -272,6 +273,20 @@ export default class Builder
     }
 
     /**
+     * Wraps an array of data as a collection.
+     *
+     * @param {Array} models
+     * @param {{}} [pagination=null]
+     * @returns {ModelCollection}
+     * @private
+     */
+    _collectData(models) {
+        let collection = this.model.newCollection(models);
+        collection.setQuery(this);
+        return collection;
+    }
+
+    /**
      * Creates a new model.
      *
      * @param {*} data
@@ -316,7 +331,7 @@ export default class Builder
                 200: function (payload) {
                     if(typeof success == 'function') {
                         var models = instance.encapsulateData(payload['data']);
-                        let collection = instance.model.newCollection(models);
+                        let collection = instance._collectData(models);
                         success(collection, payload);
                     }
                 }
@@ -404,7 +419,7 @@ export default class Builder
                 200: function (data) {
                     if(typeof success == 'function') {
                         let models = instance.encapsulateData(data);
-                        let collection = instance.model.newCollection(models);
+                        let collection = instance._collectData(models);
                         success(collection);
                     }
                 }
