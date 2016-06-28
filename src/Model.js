@@ -1,5 +1,5 @@
 import Builder from "./Builder";
-import Collection from "js_collection";
+import ModelCollection from "./ModelCollection";
 
 /**
  * A base Model class.
@@ -114,7 +114,7 @@ export default class Model {
      * @returns {*}
      */
     newCollection(data) {
-        return new Collection(data, this.primary_key);
+        return new ModelCollection(data, this.primary_key);
     }
 
     /**
