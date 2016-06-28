@@ -21,10 +21,53 @@ export default class Builder {
 
     /**
      * Appends a variable to the query url string.
+     *
+     * @param {String} name
+     * @param {*} value
+     * @returns {Builder}
      */
     append(name, value) {
-        this.appends.push({'name': name, 'value': value});
+        if(this.hasVariable(name)) {
+            throw new DuplicateVariableException(`Variable "${name}" has already been appended!`);
+        } else {
+            this.appends.push({'name': name, 'value': value});
+        }
         return this;
+    }
+
+    /**
+     * Determines whether a query builder has a variable to append.
+     *
+     * @param {String} name
+     * @returns {boolean}
+     */
+    hasVariable(name) {
+        return this.appends.get(name) != null;
+    }
+
+    /**
+     * Gets the value of a variable bound to the query builder.
+     *
+     * @param {String} name
+     * @returns {*}
+     */
+    getVariable(name) {
+        return this.hasVariable(name) ? this.appends.get(name).value : null;
+    }
+
+    /**
+     * Updates a previously appended variable.
+     *
+     * @param {String} name
+     * @param {*} value
+     * @returns {Builder}
+     */
+    updateVariable(name, value) {
+        if(this.hasVariable(name)) {
+            this.appends.get(name).value = value;
+        } else {
+            throw new UnknownVariableException(`Cannot update unknown variable with name "${name}"!`);
+        }
     }
 
     /**
