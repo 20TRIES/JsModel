@@ -81,6 +81,13 @@ export default class Model {
     }
 
     /**
+     * Creates a new query with a data attribute appended to the query.
+     */
+    append(name, value) {
+        return this.query().append(name, value);
+    }
+
+    /**
      * Creates a builder for performing queries about a model.
      *
      * @param {*} attribute
