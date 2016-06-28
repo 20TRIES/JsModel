@@ -55,7 +55,8 @@ export default class Builder
      *
      * @returns {int}
      */
-    currentPage() {
+    currentPage()
+    {
         return this.appends.get('page').value;
     }
 
@@ -64,7 +65,8 @@ export default class Builder
      *
      * @param {int} page
      */
-    setPage(page) {
+    setPage(page)
+    {
         this.appends.get('page').value = page;
         return this;
     }
@@ -72,7 +74,8 @@ export default class Builder
     /**
      * Increments the current page.
      */
-    incrementPage() {
+    incrementPage()
+    {
         this.setPage(this.currentPage() + 1);
         return this;
     }
@@ -80,7 +83,8 @@ export default class Builder
     /**
      * Decrements the current page.
      */
-    decrementPage() {
+    decrementPage()
+    {
         this.setPage(this.currentPage() - 1);
         return this;
     }
@@ -92,7 +96,8 @@ export default class Builder
      * @param {*} value
      * @returns {Builder}
      */
-    append(name, value) {
+    append(name, value)
+    {
         if(this.hasVariable(name)) {
             throw new DuplicateVariableException(`Variable "${name}" has already been appended!`);
         } else {
@@ -107,7 +112,8 @@ export default class Builder
      * @param {String} name
      * @returns {boolean}
      */
-    hasVariable(name) {
+    hasVariable(name)
+    {
         return this.appends.get(name) != null;
     }
 
@@ -117,7 +123,8 @@ export default class Builder
      * @param {String} name
      * @returns {*}
      */
-    getVariable(name) {
+    getVariable(name)
+    {
         return this.hasVariable(name) ? this.appends.get(name).value : null;
     }
 
@@ -128,7 +135,8 @@ export default class Builder
      * @param {*} value
      * @returns {Builder}
      */
-    updateVariable(name, value) {
+    updateVariable(name, value)
+    {
         if(this.hasVariable(name)) {
             this.appends.get(name).value = value;
         } else {
@@ -143,7 +151,8 @@ export default class Builder
      * @param value
      * @returns {Builder}
      */
-    where(attribute, value) {
+    where(attribute, value)
+    {
         this.conditions.wheres.push({
             "attribute": attribute,
             "value": value
@@ -154,10 +163,11 @@ export default class Builder
     /**
      * Executes a query.
      *
-     * @param {callable} success
-     * @param {callable} error
+     * @param {Function} success
+     * @param {Function} error
      */
-    get(success, error) {
+    get(success, error)
+    {
         var instance = this;
 
         jQuery.ajax({
@@ -181,8 +191,9 @@ export default class Builder
                     }
                 },
                 200: function (payload) {
-                    var data = instance.encapsulateData(payload['data']);
-                    success(instance.model.newCollection(data), payload);
+                    var models = instance.encapsulateData(payload['data']);
+                    let collection = instance.model.newCollection(models);
+                    success(collection, payload);
                 }
             }
         });
@@ -195,7 +206,8 @@ export default class Builder
      *
      * @param {*} response
      */
-    handleError(response, code) {
+    handleError(response, code)
+    {
         if(code == 500) {
             flashError('Request failed!');
         } else if(code == 422) {
@@ -222,7 +234,8 @@ export default class Builder
      *
      * @returns {string}
      */
-    toQueryString() {
+    toQueryString()
+    {
         let query_string = '';
         let first = true;
 
@@ -246,13 +259,14 @@ export default class Builder
      * Encapsulates a collection of data within a new instance of the model that belongs
      * to a Builder.
      *
-     * @param {*} items
-     * @returns {*}
+     * @param {Array} items
+     * @returns {Array}
      */
-    encapsulateData(items) {
-        for(var key in items) {
-            items[key] = this.newModel(items[key]);
-            items[key].exists = true;
+    encapsulateData(items)
+    {
+        for(let i=0; i < items.length; ++i) {
+            items[i] = this.newModel(items[i]);
+            items[i].exists = true;
         }
         return items;
     }
@@ -263,7 +277,8 @@ export default class Builder
      * @param {*} data
      * @returns {*}
      */
-    newModel(data) {
+    newModel(data)
+    {
         return new this.model.constructor(data);
     }
 
@@ -274,7 +289,8 @@ export default class Builder
      * @param {function} success
      * @param {function} error
      */
-    update(attributes, success, error) {
+    update(attributes, success, error)
+    {
         var instance = this;
         jQuery.ajax({
             headers:  { Accept: "application/json" },
@@ -299,8 +315,9 @@ export default class Builder
                 },
                 200: function (payload) {
                     if(typeof success == 'function') {
-                        var data = instance.encapsulateData(payload['data']);
-                        success(instance.model.newCollection(data), payload);
+                        var models = instance.encapsulateData(payload['data']);
+                        let collection = instance.model.newCollection(models);
+                        success(collection, payload);
                     }
                 }
             }
@@ -310,10 +327,12 @@ export default class Builder
     /**
      * Executes an insert.
      *
-     * @param {function} success
-     * @param {function} error
+     * @param {{}} attributes
+     * @param {Function} success
+     * @param {Function} error
      */
-    insert(attributes, success, error) {
+    insert(attributes, success, error)
+    {
         var instance = this;
         jQuery.ajax({
             headers:  { Accept: "application/json" },
@@ -338,7 +357,8 @@ export default class Builder
                 },
                 200: function (data) {
                     if(typeof success == 'function') {
-                        success(instance.encapsulateData([data])[0]);
+                        let models = instance.encapsulateData([data])[0];
+                        success(models);
                     }
                 }
             }
@@ -351,7 +371,8 @@ export default class Builder
      * @param {function} success
      * @param {function} error
      */
-    deleteResults(success, error) {
+    deleteResults(success, error)
+    {
         var instance = this;
         jQuery.ajax({
             headers:  { Accept: "application/json" },
@@ -382,7 +403,9 @@ export default class Builder
                 },
                 200: function (data) {
                     if(typeof success == 'function') {
-                        success(instance.model.newCollection(instance.encapsulateData(data)));
+                        let models = instance.encapsulateData(data);
+                        let collection = instance.model.newCollection(models);
+                        success(collection);
                     }
                 }
             }
