@@ -19,7 +19,8 @@ export default class Builder
         this.model = model;
         this.conditions = {"wheres": []};
         this.appends = new Collection([
-            {"name": "limit", "value": 15}
+            {"name": "limit", "value": 15},
+            {"name": "page", "value": 1}
         ], 'name');
     }
 
@@ -46,6 +47,41 @@ export default class Builder
         } else {
             this.append('limit', value);
         }
+        return this;
+    }
+
+    /**
+     * Gets the current page.
+     *
+     * @returns {int}
+     */
+    currentPage() {
+        return this.appends.get('page').value;
+    }
+
+    /**
+     * Sets the current page.
+     *
+     * @param {int} page
+     */
+    setPage(page) {
+        this.appends.get('page').value = page;
+        return this;
+    }
+
+    /**
+     * Increments the current page.
+     */
+    incrementPage() {
+        this.setPage(this.currentPage() + 1);
+        return this;
+    }
+
+    /**
+     * Decrements the current page.
+     */
+    decrementPage() {
+        this.setPage(this.currentPage() - 1);
         return this;
     }
 

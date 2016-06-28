@@ -65,7 +65,7 @@ suite('Builder', function() {
     });
 
     // LIMIT
-    test('test_that_default_limit_of_fifteen_is_set_within_appends', function () {
+    test('test_that_default_limit_of_fifteen_is_set', function () {
         let builder = new Builder({});
         assert.equal(builder.getLimit(), 15);
     });
@@ -87,5 +87,34 @@ suite('Builder', function() {
     });
     test('test_that_setLimit_returns_self', function () {
         assert.instanceOf((new Builder({})).setLimit(10), Builder);
+    });
+
+    // PAGE
+    test('test_that_default_page_is_set_to_one', function () {
+        let builder = new Builder({});
+        assert.equal(builder.currentPage(), 1);
+    });
+    test('test_set_page', function () {
+        let builder = new Builder({});
+        let mock_page = 9999;
+        builder.setPage(mock_page);
+        assert.equal(builder.currentPage(), mock_page);
+    });
+    test('test_increment_page', function () {
+        let builder = new Builder({});
+        builder.incrementPage();
+        assert.equal(builder.currentPage(), 2);
+    });
+    test('test_decrement_page', function () {
+        let builder = new Builder({});
+        builder.decrementPage();
+        assert.equal(builder.currentPage(), 0);
+    });
+    test('test_page_is_incorporated_into_query_string', function () {
+        // Page is currently handled as an "append" and as such is covered for this under
+        // that methods tests.
+    });
+    test('test_that_setPage_returns_self', function () {
+        assert.instanceOf((new Builder({})).setPage(10), Builder);
     });
 });
