@@ -72,6 +72,15 @@ export default class Model {
     }
 
     /**
+     * Gets a new query builder instance.
+     *
+     * {Builder}
+     */
+    query() {
+        return new Builder(this);
+    }
+
+    /**
      * Creates a builder for performing queries about a model.
      *
      * @param {*} attribute
@@ -79,7 +88,7 @@ export default class Model {
      * @returns {Builder}
      */
     where(attribute, value) {
-        return (new Builder(this)).where(attribute, value);
+        return this.query().where(attribute, value);
     }
 
     /**
@@ -88,7 +97,7 @@ export default class Model {
      * @returns {Collection}
      */
     all(success, error) {
-        return new Builder(this).get(success, error);
+        return this.query().get(success, error);
     }
 
     /**
@@ -134,7 +143,7 @@ export default class Model {
         var attributes = this.dirty();
         attributes[this.primary_key] = this.attributes[this.primary_key];
 
-        var builder = new Builder(this);
+        var builder = this.query();
         if(this.exists) {
             builder
                 .where(this.primary_filter, this.attributes[this.primary_key])
@@ -211,7 +220,7 @@ export default class Model {
 
         instance.syncing = true;
 
-        var builder = new Builder(this);
+        var builder = this.query();
 
         if(this.exists) {
             builder
