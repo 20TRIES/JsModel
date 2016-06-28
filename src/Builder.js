@@ -7,18 +7,46 @@ let jQuery = require('jquery');
 /**
  * A builder class for building query strings for a Filterable API.
  */
-export default class Builder {
+export default class Builder
+{
     /**
      * Constructor.
      *
      * @param model
      */
-    constructor(model) {
+    constructor(model)
+    {
         this.model = model;
-        this.conditions = {
-            "wheres": [],
-        };
-        this.appends = new Collection([], 'name');
+        this.conditions = {"wheres": []};
+        this.appends = new Collection([
+            {"name": "limit", "value": 15}
+        ], 'name');
+    }
+
+    /**
+     * Gets the current limit that is applied to the query.
+     *
+     * @returns {int}
+     */
+    getLimit()
+    {
+        return this.hasVariable('limit') ? this.appends.get('limit').value : -1;
+    }
+
+    /**
+     * Sets the current limit that should applied to the query.
+     *
+     * @param {int} value
+     * @returns {Builder}
+     */
+    setLimit(value)
+    {
+        if(this.hasVariable('limit')) {
+            this.updateVariable('limit', value)
+        } else {
+            this.append('limit', value);
+        }
+        return this;
     }
 
     /**
@@ -166,13 +194,13 @@ export default class Builder {
             let where = this.conditions.wheres[i];
             query_string += (first ? '?' : '&');
             query_string += `filters[${encodeURIComponent(where.attribute)}][]=${encodeURIComponent(where.value)}`;
-            first = first !== true;
+            first = false;
         }
 
         this.appends.each((key, item) => {
             query_string += (first ? '?' : '&');
             query_string += `${encodeURIComponent(item.name)}=${encodeURIComponent(item.value)}`;
-            first = first !== true;
+            first = false;
         }, query_string);
 
         return query_string;

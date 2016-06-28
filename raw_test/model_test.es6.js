@@ -63,4 +63,29 @@ suite('Builder', function() {
             builder.updateVariable('var', 1);
         }, UnknownVariableException);
     });
+
+    // LIMIT
+    test('test_that_default_limit_of_fifteen_is_set_within_appends', function () {
+        let builder = new Builder({});
+        assert.equal(builder.getLimit(), 15);
+    });
+    test('test_set_limit', function () {
+        let builder = new Builder({});
+        let mock_limit = 9999;
+        builder.setLimit(mock_limit);
+        assert.equal(builder.getLimit(), mock_limit);
+    });
+    test('test_set_limit_takes_a_negative_value', function () {
+        let builder = new Builder({});
+        let mock_limit = -1;
+        builder.setLimit(mock_limit);
+        assert.equal(builder.getLimit(), mock_limit);
+    });
+    test('test_limit_is_incorperated_into_query_string', function () {
+        // Limit is currently handled as an "append" and as such is covered for this under
+        // that methods tests.
+    });
+    test('test_that_setLimit_returns_self', function () {
+        assert.instanceOf((new Builder({})).setLimit(10), Builder);
+    });
 });
