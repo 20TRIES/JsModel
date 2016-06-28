@@ -1,4 +1,6 @@
 import Collection from 'js_collection';
+import DuplicateVariableException from "../src/DuplicateVariableException";
+import UnknownVariableException from "../src/UnknownVariableException";
 
 let jQuery = require('jquery');
 
@@ -163,13 +165,13 @@ export default class Builder {
         for(let i=0; i < this.conditions.wheres.length; ++i) {
             let where = this.conditions.wheres[i];
             query_string += (first ? '?' : '&');
-            query_string += 'filters[' + where.attribute + '][]=' + encodeURIComponent(where.value);
+            query_string += `filters[${encodeURIComponent(where.attribute)}][]=${encodeURIComponent(where.value)}`;
             first = first !== true;
         }
 
         this.appends.each((key, item) => {
             query_string += (first ? '?' : '&');
-            query_string += `${item.name}=` + encodeURIComponent(item.value);
+            query_string += `${encodeURIComponent(item.name)}=${encodeURIComponent(item.value)}`;
             first = first !== true;
         }, query_string);
 
