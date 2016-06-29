@@ -7,8 +7,11 @@ import ModelCollection from "./ModelCollection";
 export default class Model {
     /**
      * Constructor
+     *
+     * @param {Object} [data={}]
      */
-    constructor(data) {
+    constructor(data = {})
+    {
         this.url = '/';
         this.primary_key = 'id';
         this.primary_filter = 'id';
