@@ -25,6 +25,18 @@ export default class Model {
     }
 
     /**
+     * Creates a new query builder instance with its ordering configured.
+     *
+     * @param attribute
+     * @param direction
+     * @returns {*|Builder}
+     */
+    static orderBy(attribute, direction)
+    {
+        return this.query().orderBy(attribute, direction);
+    }
+
+    /**
      * Populates a new model with a set of data.
      *
      * @param {Object} attributes
@@ -79,7 +91,7 @@ export default class Model {
      *
      * {Builder}
      */
-    query() {
+    static query() {
         return new Builder(this);
     }
 

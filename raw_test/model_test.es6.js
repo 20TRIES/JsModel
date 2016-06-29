@@ -1,4 +1,5 @@
 import Builder from "../src/Builder";
+import Model from "../src/Model";
 import DuplicateVariableException from "../src/DuplicateVariableException";
 import UnknownVariableException from "../src/UnknownVariableException";
 
@@ -6,6 +7,15 @@ var assert = require('chai').assert;
 
 suite('Model', function() {
 
+    // ORDER BY
+    test('test_order_by_is_static_shortcut_to_builder_method', function () {
+        let mock_attribute = 'mock_var_name';
+        let mock_direction = 'desc';
+        let builder = Model.orderBy(mock_attribute, mock_direction);
+        assert.instanceOf(builder, Builder);
+        assert.equal(mock_attribute, builder.orderingBy());
+        assert.equal(mock_direction, builder.orderingByDirection());
+    });
 });
 
 suite('Builder', function() {
@@ -146,5 +156,43 @@ suite('Builder', function() {
     });
     test('test_that_setPage_returns_self', function () {
         assert.instanceOf((new Builder({})).setPage(10), Builder);
+    });
+
+
+    // ORDERING
+    test('test_that_ordering_is_off_by_default', function () {
+        let builder = new Builder({});
+        assert.equal(builder.orderingBy(), null);
+    });
+    test('test_order_by', function () {
+        let builder = new Builder({});
+
+        let mock_attribute = 'some_mock_attribute';
+        let mock_direction = 'desc';
+
+        builder.orderBy(mock_attribute, mock_direction);
+
+        assert.equal(mock_attribute, builder.orderingBy());
+        assert.equal(mock_direction, builder.orderingByDirection());
+    });
+    test('test_order_by_returned_itself', function () {
+        let builder = new Builder({});
+        let result = builder.orderBy('some_mock_attribute', 'desc');
+        assert.equal(JSON.stringify(builder), JSON.stringify(result));
+    });
+    test('test_order_by_uses_default_direction_if_direction_is_invalid', function () {
+        let builder = new Builder({});
+        let mock_attribute = 'some_mock_attribute';
+        let mock_direction = 'some_mock_direction';
+        builder.orderBy(mock_attribute, mock_direction);
+        assert.equal(mock_attribute, builder.orderingBy());
+        assert.equal(builder.default_ordering_direction, builder.orderingByDirection());
+    });
+    test('test_order_by_allows_direction_to_be_ommitted', function () {
+        let builder = new Builder({});
+        let mock_attribute = 'some_mock_attribute';
+        builder.orderBy(mock_attribute);
+        assert.equal(mock_attribute, builder.orderingBy());
+        assert.equal(builder.default_ordering_direction, builder.orderingByDirection());
     });
 });
