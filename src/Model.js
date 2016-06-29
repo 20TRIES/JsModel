@@ -224,7 +224,7 @@ export default class Model {
      * @param success
      * @param error
      */
-    delete(success, error)
+    deleteModel(success, error)
     {
         var instance = this;
 
