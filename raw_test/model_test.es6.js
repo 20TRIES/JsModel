@@ -63,6 +63,36 @@ suite('Builder', function() {
             builder.updateVariable('var', 1);
         }, UnknownVariableException);
     });
+    test('test_that_appends_store_array_values', function () {
+        let builder = new Builder({});
+        let mock_var_name = 'mock_var_name';
+        let mock_val_1 = [1,2,3];
+        builder.append(mock_var_name, mock_val_1);
+        assert.equal(mock_val_1, builder.getVariable(mock_var_name));
+    });
+    test('test_that_to_query_string_correctly_handles_appends_with_array_values', function () {
+        let builder = new Builder({});
+        let original_query_string = builder.toQueryString();
+        let mock_name = 'mock';
+        let mock_value = [1,2,3];
+        builder.append(mock_name, mock_value);
+        assert.equal(builder.toQueryString(), `${original_query_string == "" ? "?" : original_query_string + "&"}${mock_name}[]=1&${mock_name}[]=2&${mock_name}[]=3`);
+    });
+    test('test_that_appends_store_object_values', function () {
+        let builder = new Builder({});
+        let mock_var_name = 'mock_var_name';
+        let mock_val_1 = {"one":1, "two":2, "three":3};
+        builder.append(mock_var_name, mock_val_1);
+        assert.equal(JSON.stringify(mock_val_1), JSON.stringify(builder.getVariable(mock_var_name)));
+    });
+    test('test_that_to_query_string_correctly_handles_appends_with_object_values', function () {
+        let builder = new Builder({});
+        let original_query_string = builder.toQueryString();
+        let mock_name = 'mock';
+        let mock_value = {"one":1, "two":2, "three":3};
+        builder.append(mock_name, mock_value);
+        assert.equal(builder.toQueryString(), `${original_query_string == "" ? "?" : original_query_string + "&"}${mock_name}[one]=1&${mock_name}[two]=2&${mock_name}[three]=3`);
+    });
 
     // LIMIT
     test('test_that_default_limit_of_fifteen_is_set', function () {

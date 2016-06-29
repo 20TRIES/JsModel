@@ -248,8 +248,21 @@ export default class Builder
         }
 
         this.appends.each((key, item) => {
-            query_string += (first ? '?' : '&');
-            query_string += `${encodeURIComponent(item.name)}=${encodeURIComponent(item.value)}`;
+            if(item.value instanceof Array) {
+                for(let i=0; i < item.value.length; ++i) {
+                    query_string += (first ? '?' : '&');
+                    query_string += `${encodeURIComponent(item.name)}[]=${encodeURIComponent(item.value[i])}`;
+                }
+            } else if(item.value instanceof Object) {
+                for(key in item.value) {
+                    query_string += (first ? '?' : '&');
+                    query_string += `${encodeURIComponent(item.name)}[${encodeURIComponent(key)}]=${encodeURIComponent(item.value[key])}`;
+                }
+            }
+            else {
+                query_string += (first ? '?' : '&');
+                query_string += `${encodeURIComponent(item.name)}=${encodeURIComponent(item.value)}`;
+            }
             first = false;
         }, query_string);
 
