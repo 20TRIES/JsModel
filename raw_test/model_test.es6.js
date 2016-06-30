@@ -1,5 +1,6 @@
 import Builder from "../src/Builder";
 import Model from "../src/Model";
+import Collection from "js_collection";
 import DuplicateVariableException from "../src/DuplicateVariableException";
 import UnknownVariableException from "../src/UnknownVariableException";
 
@@ -188,11 +189,32 @@ suite('Builder', function() {
         assert.equal(mock_attribute, builder.orderingBy());
         assert.equal(builder.default_ordering_direction, builder.orderingByDirection());
     });
-    test('test_order_by_allows_direction_to_be_ommitted', function () {
+
+
+    // WHERE
+    test('test_where', function () {
         let builder = new Builder({});
-        let mock_attribute = 'some_mock_attribute';
-        builder.orderBy(mock_attribute);
-        assert.equal(mock_attribute, builder.orderingBy());
-        assert.equal(builder.default_ordering_direction, builder.orderingByDirection());
+        let default_query_string = builder.toQueryString().substring(1);
+        builder.where('mock_attribute', 'mock_value')
+        let expected = '?filters[mock_attribute][]=mock_value' + `&${default_query_string}`;
+        assert.equal(expected, builder.toQueryString());
+    });
+
+
+    // CONSTRAINTS
+    test('test_get_constraint_value', function () {
+        let builder = new Builder({});
+        let mock_constraint_name = 'mock_constraint_name';
+        let mock_constraint_value = 'mock_constraint_value';
+        builder.where(mock_constraint_name, mock_constraint_value);
+        assert.equal(builder.getConstraintValue(mock_constraint_name), mock_constraint_value);
+    });
+    test('test_changes_made_to_the_value_returned_by_get_constrain_do_not_effect_the_query', function () {
+        let builder = new Builder({});
+        let mock_constraint_name = 'mock_constraint_name';
+        let mock_constraint_value = {mock: 'mock'};
+        builder.where(mock_constraint_name, {mock: 'mock'});
+        builder.getConstraintValue(mock_constraint_name).mock = 'not mock';
+        assert.equal(JSON.stringify(builder.getConstraintValue(mock_constraint_name)), JSON.stringify(mock_constraint_value));
     });
 });

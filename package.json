@@ -24,7 +24,8 @@
   "homepage": "https://github.com/20TRIES/JsModel#readme",
   "dependencies": {
     "js_collection": "0.0.*",
-    "jquery": "3.0.*"
+    "jquery": "3.0.*",
+    "clone": "1.0.*"
   },
   "devDependencies": {
     "mocha": "^2.5.*",

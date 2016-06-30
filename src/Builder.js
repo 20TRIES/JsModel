@@ -4,6 +4,7 @@ import DuplicateVariableException from "../src/DuplicateVariableException";
 import UnknownVariableException from "../src/UnknownVariableException";
 
 let jQuery = require('jquery');
+let clone = require('clone');
 
 /**
  * A builder class for building query strings for a Filterable API.
@@ -18,12 +19,31 @@ export default class Builder
     constructor(model)
     {
         this.model = model;
-        this.conditions = {"wheres": []};
+        
+        this._constraints = new Collection([
+            // {filter: "filter_name", value: "filter_value"}
+        ], 'filter');
+
         this.appends = new Collection([
             {"name": "limit", "value": 15},
             {"name": "page", "value": 1}
         ], 'name');
+
         this.default_ordering_direction = 'asc';
+    }
+
+    /**
+     * Gets the value of a constraint that is being applied to a query; returns null if the constraint
+     * does not exist.
+     *
+     * @param {String} filter
+     * @returns {*}
+     */
+    getConstraintValue(filter) {
+        let constraint = this._constraints.get(filter);
+        return constraint != null
+            ? (constraint.value instanceof Object ? clone(constraint.value) : constraint.value)
+            : null;
     }
 
     /**
@@ -194,16 +214,21 @@ export default class Builder
     /**
      * Adds a where condition to a query.
      *
-     * @param attribute
+     * @param filter
      * @param value
      * @returns {Builder}
      */
-    where(attribute, value)
+    where(filter, value)
     {
-        this.conditions.wheres.push({
-            "attribute": attribute,
-            "value": value
-        });
+        let constraint = this._constraints.get(filter);
+        if(constraint == null) {
+            this._constraints.push({
+                filter: filter,
+                value: value
+            })
+        } else {
+            constraint.value = value;
+        }
         return this;
     }
 
@@ -286,12 +311,11 @@ export default class Builder
         let query_string = '';
         let first = true;
 
-        for(let i=0; i < this.conditions.wheres.length; ++i) {
-            let where = this.conditions.wheres[i];
+        this._constraints.each((key, constraint) => {
             query_string += (first ? '?' : '&');
-            query_string += `filters[${encodeURIComponent(where.attribute)}][]=${encodeURIComponent(where.value)}`;
+            query_string += `filters[${encodeURIComponent(constraint.filter)}][]=${encodeURIComponent(constraint.value)}`;
             first = false;
-        }
+        });
 
         this.appends.each((key, item) => {
             if(item.value instanceof Array) {
