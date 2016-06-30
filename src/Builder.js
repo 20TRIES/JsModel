@@ -259,16 +259,12 @@ export default class Builder
             url: this.model.url + this.toQueryString(),
             statusCode: {
                 500: function (response) {
-                    if(typeof error == 'undefined') {
-                        instance.handleError(response, 500);
-                    } else {
+                    if(typeof error == 'function') {
                         error(response, 500);
                     }
                 },
                 422: function (response) {
-                    if(typeof error == 'undefined') {
-                        instance.handleError(response, 422);
-                    } else {
+                    if(typeof error == 'function') {
                         error(response, 500);
                     }
                 },
@@ -279,36 +275,6 @@ export default class Builder
                 }
             }
         });
-    }
-
-
-
-    /**
-     * Handles errors returned when retrieving model data.
-     *
-     * @param {*} response
-     */
-    handleError(response, code)
-    {
-        if(code == 500) {
-            flashError('Request failed!');
-        } else if(code == 422) {
-            var data = response.responseJSON;
-            if(data.constructor == Array) {
-                for(var i=0; i < data.length; ++i) {
-                    flashError(data[i]);
-                }
-            }
-            else {
-                for (var key in data) {
-                    if (data.hasOwnProperty(key)) {
-                        flashError(jQuery(data).attr(key));
-                    }
-                }
-            }
-        } else if(code == 403) {
-            flashError('Permission Denied!');
-        }
     }
 
     /**
@@ -408,16 +374,12 @@ export default class Builder
             data: attributes,
             statusCode: {
                 500: function (response) {
-                    if(typeof error != 'function') {
-                        instance.handleError(response, 500);
-                    } else {
+                    if(typeof error == 'function') {
                         error(response, 500);
                     }
                 },
                 422: function (response) {
-                    if(typeof error != 'function') {
-                        instance.handleError(response, 422);
-                    } else {
+                    if(typeof error == 'function') {
                         error(response, 422);
                     }
                 },
@@ -450,16 +412,12 @@ export default class Builder
             data: attributes,
             statusCode: {
                 500: function (response) {
-                    if(typeof error != 'function') {
-                        instance.handleError(response, 500);
-                    } else {
+                    if(typeof error == 'function') {
                         error(response, 500);
                     }
                 },
                 422: function (response) {
-                    if(typeof error != 'function') {
-                        instance.handleError(response, 422);
-                    } else {
+                    if(typeof error == 'function') {
                         error(response, 422);
                     }
                 },
@@ -489,23 +447,17 @@ export default class Builder
             url: this.model.url + '/delete' + this.toQueryString(),
             statusCode: {
                 500: function (response) {
-                    if(typeof error != 'function') {
-                        instance.handleError(response, 500);
-                    } else {
+                    if(typeof error == 'function') {
                         error(response, 500);
                     }
                 },
                 422: function (response) {
-                    if(typeof error != 'function') {
-                        instance.handleError(response, 422);
-                    } else {
+                    if(typeof error == 'function') {
                         error(response, 422);
                     }
                 },
                 403: function() {
-                    if(typeof error != 'function') {
-                        instance.handleError(null, 403);
-                    } else {
+                    if(typeof error == 'function') {
                         error(null, 403);
                     }
                 },
