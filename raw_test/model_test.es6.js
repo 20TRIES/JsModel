@@ -1,6 +1,5 @@
 import Builder from "../src/Builder";
 import Model from "../src/Model";
-import Collection from "js_collection";
 import DuplicateVariableException from "../src/DuplicateVariableException";
 import UnknownVariableException from "../src/UnknownVariableException";
 
