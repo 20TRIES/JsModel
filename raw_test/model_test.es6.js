@@ -12,7 +12,7 @@ suite('Model', function() {
     test('test_order_by_is_static_shortcut_to_builder_method', function () {
         let mock_attribute = 'mock_var_name';
         let mock_direction = 'desc';
-        let builder = Model.orderBy(mock_attribute, mock_direction);
+        let builder = (new Model ()).orderBy(mock_attribute, mock_direction);
         assert.instanceOf(builder, Builder);
         assert.equal(mock_attribute, builder.orderingBy());
         assert.equal(mock_direction, builder.orderingByDirection());
