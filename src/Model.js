@@ -31,7 +31,7 @@ export default class Model {
      * @param direction
      * @returns {*|Builder}
      */
-    static orderBy(attribute, direction)
+    orderBy(attribute, direction)
     {
         return this.query().orderBy(attribute, direction);
     }
@@ -91,7 +91,7 @@ export default class Model {
      *
      * {Builder}
      */
-    static query() {
+    query() {
         return new Builder(this);
     }
 
