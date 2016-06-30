@@ -28,8 +28,6 @@ export default class Builder
             {"name": "limit", "value": 15},
             {"name": "page", "value": 1}
         ], 'name');
-
-        this.default_ordering_direction = 'asc';
     }
 
     /**
@@ -60,16 +58,15 @@ export default class Builder
      * Determines the attribute that a query is being ordered by; if no ordering is being
      * applied, then null will be returned.
      *
-     * @param {String} attribute
-     * @param {String} [direction=this.default_ordering_direction]
+     * @param {...*} orderings A set of orderings formatted {attribute, order_direction, ...}
      * @returns {Builder}
      */
-    orderBy(attribute, direction = this.default_ordering_direction)
+    orderBy(...orderings)
     {
         if(this.hasVariable('order')) {
-            this.updateVariable('order', [attribute, direction]);
+            this.updateVariable('order', orderings);
         } else {
-            this.append('order', [attribute, direction]);
+            this.append('order', orderings);
         }
         return this;
     }
@@ -78,27 +75,11 @@ export default class Builder
      * Determines the attribute that a query is being ordered by; if no ordering is being
      * applied, then null will be returned.
      *
-     * @returns {String|null}
+     * @returns {Array}
      */
     orderingBy()
     {
-        return this.hasVariable('order') ? this.appends.get('order').value[0] : null;
-    }
-
-    /**
-     * Determines the direction of ordering that a query is using.
-     *
-     * @returns {String|null}
-     */
-    orderingByDirection()
-    {
-        if(this.hasVariable('order')) {
-            let ordering = this.appends.get('order');
-            return ordering.value.some((val) => val === 'asc' || val === 'desc')
-                ? ordering.value[1]
-                : this.default_ordering_direction;
-        }
-        return null;
+        return this.hasVariable('order') ? clone(this.getVariable('order')) : null;
     }
 
     /**

@@ -27,13 +27,13 @@ export default class Model {
     /**
      * Creates a new query builder instance with its ordering configured.
      *
-     * @param attribute
-     * @param direction
-     * @returns {*|Builder}
+     * @param {...*} orderings A set of orderings formatted {attribute, order_direction, ...}
+     * @returns {Builder}
      */
-    orderBy(attribute, direction)
+    orderBy(...orderings)
     {
-        return this.query().orderBy(attribute, direction);
+        let query = this.query();
+        return query.orderBy.apply(query, orderings);
     }
 
     /**
