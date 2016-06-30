@@ -47,6 +47,16 @@ export default class Builder
     }
 
     /**
+     * Determine whether a query has a constraint set for a certain filter.
+     *
+     * @param {String} filter
+     * @returns {Boolean}
+     */
+    hasConstraint(filter) {
+        return this._constraints.get(filter) != null;
+    }
+
+    /**
      * Determines the attribute that a query is being ordered by; if no ordering is being
      * applied, then null will be returned.
      *

@@ -201,6 +201,13 @@ suite('Builder', function() {
 
 
     // CONSTRAINTS
+    test('test_has_constraint', function () {
+        let builder = new Builder({});
+        let mock_constraint_name = 'mock_constraint_name';
+        let mock_constraint_value = 'mock_constraint_value';
+        builder.where(mock_constraint_name, mock_constraint_value);
+        assert.equal(builder.hasConstraint(mock_constraint_name), true);
+    });
     test('test_get_constraint_value', function () {
         let builder = new Builder({});
         let mock_constraint_name = 'mock_constraint_name';
