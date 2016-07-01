@@ -114,9 +114,21 @@ export default class Model {
     }
 
     /**
+     * Attempts to find a model with a specific id.
+     *
+     * @param {*} id
+     * @param {Function} success
+     * @param {Function} error
+     * @returns {ModelCollection}
+     */
+    find(id, success, error) {
+        return this.where(this.primary_key, id).get(success, error);
+    }
+
+    /**
      * Gets all records for a model.
      *
-     * @returns {Collection}
+     * @returns {ModelCollection}
      */
     all(success, error) {
         return this.query().get(success, error);
