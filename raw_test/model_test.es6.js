@@ -184,6 +184,15 @@ suite('Builder', function() {
         let result = builder.orderBy('some_mock_attribute', 'desc');
         assert.equal(JSON.stringify(builder), JSON.stringify(result));
     });
+    test('test_order_by_takes_multiple_orderings', function () {
+        let builder = new Builder({});
+        let mock_attribute_1 = 'some_mock_attribute_!';
+        let mock_direction_1 = 'desc_1';
+        let mock_attribute_2 = 'some_mock_attribute_2';
+        let mock_direction_2 = 'desc_2';
+        builder.orderBy(mock_attribute_1, mock_direction_1, mock_attribute_2, mock_direction_2);
+        assert.equal(JSON.stringify([mock_attribute_1, mock_direction_1, mock_attribute_2, mock_direction_2]), JSON.stringify(builder.orderingBy()));
+    });
 
 
     // WHERE
