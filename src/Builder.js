@@ -2,9 +2,8 @@ import ModelCollection from './ModelCollection';
 import Collection from 'js_collection';
 import DuplicateVariableException from "../src/DuplicateVariableException";
 import UnknownVariableException from "../src/UnknownVariableException";
-
-let jQuery = require('jquery');
-let clone = require('clone');
+import jQuery from 'jquery';
+import clone  from 'clone';
 
 /**
  * A builder class for building query strings for a Filterable API.
