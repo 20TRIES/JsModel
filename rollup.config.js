@@ -21,7 +21,7 @@ module.exports = {
             // want to include, add it to 'skip'. Local and relative imports
             // can be skipped by giving the full filepath. E.g.,
             // `path.resolve('src/relative-dependency.js')`
-            skip: [ 'some-big-dependency' ],  // Default: []
+            skip: [],  // Default: []
 
             // some package.json files have a `browser` field which
             // specifies alternative files to load for people bundling
