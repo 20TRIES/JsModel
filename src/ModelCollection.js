@@ -32,19 +32,26 @@ export default class ModelCollection extends Collection
     }
 
     /**
-     * Loads the next page of results into the collection.
+     * Loads the next page of results.
+     *
+     * If a success callback is not provided, then the results will be merged into the current collection; otherwise,
+     * this will be left to the callback provided.
      *
      * Requires a builder to be set which is responsible for the collection.
+     *
+     * @param {Function} success
+     * @param {Function} error
      */
-    loadNextPage()
+    loadNextPage(success = null, error = null)
     {
         if(this.query != null && this.query.getLimit() !== -1) {
             let instance = this;
             this.query.incrementPage();
-            this.query.get((results) => {
-                instance.merge(results);
-            },() => {
+            this.query.get(success instanceof Function ? success : instance.merge, (...args) => {
                 instance.query.decrementPage();
+                if(error instanceof Function) {
+                    error.apply(error, args);
+                }
             });
         } else {
             throw new MissingQueryBuilderException('Cannot load next page; no query builder set for model collection!');
