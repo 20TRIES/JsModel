@@ -47,12 +47,21 @@ export default class ModelCollection extends Collection
         if(this.query != null && this.query.getLimit() !== -1) {
             let instance = this;
             this.query.incrementPage();
-            this.query.get(success instanceof Function ? success : instance.merge, (...args) => {
-                instance.query.decrementPage();
-                if(error instanceof Function) {
-                    error.apply(error, args);
+            this.query.get(
+                function(results) {
+                    if(success instanceof Function) {
+                        success(results)
+                    } else {
+                        instance.merge(results);
+                    }
+                },
+                function(...args) {
+                    instance.query.decrementPage();
+                    if(error instanceof Function) {
+                        error.apply(error, args);
+                    }
                 }
-            });
+            );
         } else {
             throw new MissingQueryBuilderException('Cannot load next page; no query builder set for model collection!');
         }
