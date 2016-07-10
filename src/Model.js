@@ -1,5 +1,7 @@
 import Builder from "./Builder";
 import ModelCollection from "./ModelCollection";
+import clone  from 'clone';
+
 
 /**
  * A base Model class.
@@ -280,5 +282,18 @@ export default class Model {
                     }
                 })(error));
         }
+    }
+
+    /**
+     * Creates a clone of a model instance.
+     *
+     * @returns {Model}
+     */
+    clone() {
+        let cloned_model = new this.constructor(clone(this.attributes));
+        cloned_model.original = clone(this.original);
+        cloned_model.syncing = this.syncing;
+        cloned_model.exists = this.exists;
+        return cloned_model;
     }
 }

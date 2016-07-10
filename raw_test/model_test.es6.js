@@ -14,6 +14,30 @@ suite('Model', function() {
         chai.assert.instanceOf(builder, Builder);
         chai.assert.equal(JSON.stringify([mock_attribute, mock_direction]), JSON.stringify(builder.orderingBy()));
     });
+
+    // CLONE
+    test('test_clone_method', function () {
+        let mock_attributes = {"mock_attr": "mock_value"};
+        let model = new Model(mock_attributes);
+        model.exists = true;
+        model.syncing = true;
+        model.original = 'mock_orginal';
+        let clone = model.clone();
+        chai.assert.equal(true, clone.syncing);
+        chai.assert.equal(JSON.stringify(mock_attributes), JSON.stringify(clone.attributes));
+        chai.assert.equal("mock_value", clone["mock_attr"]);
+        chai.assert.equal(true, clone.exists);
+        chai.assert.equal('mock_orginal', clone.original);
+    });
+    test('test_clone_deep_clones', function () {
+        let mock_attributes = {mock_attr: "mock_value"};
+        let model = new Model(mock_attributes);
+        let clone = model.clone();
+        clone.attributes.mock_attr = "other_mock_value";
+        clone.original.mock_attr = "other_mock_value";
+        chai.assert.equal("mock_value", model.attributes.mock_attr);
+        chai.assert.equal("mock_value", model.original.mock_attr);
+    });
 });
 
 suite('Builder', function() {
