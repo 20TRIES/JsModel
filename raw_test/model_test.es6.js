@@ -42,6 +42,12 @@ suite('Model', function() {
 
 suite('Builder', function() {
 
+    // GET VARIABLE
+    test('test_getVariable_returns_default_value_if_no_variable_is_set', function () {
+        let expected = 'mock_result_1872';
+        chai.assert.equal((new Builder()).getVariable('mock_variable_1213421', expected), expected);
+    });
+
     // APPENDS
     test('test_appends_adds_variable_to_query_string_that_doesnt_have_filters', function () {
         let builder = new Builder({});

@@ -178,11 +178,12 @@ export default class Builder
      * Gets the value of a variable bound to the query builder.
      *
      * @param {String} name
+     * @param {*} default_result
      * @returns {*}
      */
-    getVariable(name)
+    getVariable(name, default_result = null)
     {
-        return this.hasVariable(name) ? this.appends.get(name).value : null;
+        return this.hasVariable(name) ? this.appends.get(name).value : default_result;
     }
 
     /**
