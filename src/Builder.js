@@ -237,7 +237,7 @@ export default class Builder
      * @returns {HttpRequest}
      * @private
      */
-    static _request()
+    static _newRequest()
     {
         let request = new HttpRequest();
         request.setHeader('Accept', 'application/json');
@@ -253,7 +253,7 @@ export default class Builder
      */
     get(success = () => {}, error = () => {})
     {
-        let request = this._request();
+        let request = this.constructor._newRequest();
         request.setHeader('Accept', 'application/json');
         request.setDataType('json');
         request.setMethod('GET');
@@ -355,7 +355,7 @@ export default class Builder
      */
     update(attributes, success = () => {}, error  = () => {})
     {
-        let request = this._request();
+        let request = this.constructor._newRequest();
         request.setMethod('POST');
         request.setUrl(`${this.model.url}/update${this.toQueryString()}`);
         request.setData(attributes);
@@ -377,7 +377,7 @@ export default class Builder
      */
     insert(attributes, success = () => {}, error  = () => {})
     {
-        let request = this._request();
+        let request = this.constructor._newRequest();
         request.setMethod('POST');
         request.setUrl(`${this.model.url}/store`);
         request.onSuccess((payload) => success(this.encapsulateData([payload])[0]));
@@ -394,7 +394,7 @@ export default class Builder
      */
     deleteResults(success = () => {}, error = () => {})
     {
-        let request = this._request();
+        let request = this.constructor._newRequest();
         request.setMethod('POST');
         request.setUrl(`${this.model.url}/delete${this.toQueryString()}`);
         request.onSuccess((payload) => {
