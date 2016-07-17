@@ -1,5 +1,5 @@
 import Collection from "js_collection";
-import MissingQueryBuilderException from "./MissingQueryBuilderException";
+import MissingQueryBuilderException from "./Exceptions/MissingQueryBuilderException";
 
 /**
  * A base Model collection class.

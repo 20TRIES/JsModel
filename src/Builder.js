@@ -1,8 +1,8 @@
 import ModelCollection from './ModelCollection';
 import Collection from 'js_collection';
-import DuplicateVariableException from "../src/DuplicateVariableException";
-import UnknownVariableException from "../src/UnknownVariableException";
 import jQuery from 'jquery';
+import DuplicateVariableException from "../src/Exceptions/DuplicateVariableException";
+import UnknownVariableException from "../src/Exceptions/UnknownVariableException";
 import clone  from 'clone';
 
 /**

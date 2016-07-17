@@ -1,7 +1,7 @@
 import Builder from "../src/Builder";
 import Model from "../src/Model";
-import DuplicateVariableException from "../src/DuplicateVariableException";
-import UnknownVariableException from "../src/UnknownVariableException";
+import DuplicateVariableException from "../src/Exceptions/DuplicateVariableException";
+import UnknownVariableException from "../src/Exceptions/UnknownVariableException";
 import chai from "chai/chai";
 
 suite('Model', function() {
