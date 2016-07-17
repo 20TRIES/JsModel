@@ -42,7 +42,8 @@ export default class Builder
      * @param {String} filter
      * @returns {*}
      */
-    getConstraintValue(filter) {
+    getConstraintValue(filter)
+    {
         let constraint = this._constraints.get(filter);
         return constraint != null
             ? (constraint.value instanceof Object ? clone(constraint.value) : constraint.value)
@@ -55,7 +56,8 @@ export default class Builder
      * @param {String} filter
      * @returns {Boolean}
      */
-    hasConstraint(filter) {
+    hasConstraint(filter)
+    {
         return this._constraints.get(filter) != null;
     }
 
@@ -235,7 +237,8 @@ export default class Builder
      * @returns {HttpRequest}
      * @private
      */
-    _request() {
+    static _request()
+    {
         return new HttpRequest();
     }
 
@@ -319,11 +322,11 @@ export default class Builder
      * Wraps an array of data as a collection.
      *
      * @param {Array} models
-     * @param {{}} [pagination=null]
      * @returns {ModelCollection}
      * @private
      */
-    _collectData(models) {
+    _collectData(models)
+    {
         let collection = this.model.newCollection(models);
         collection.setQuery(this);
         return collection;
