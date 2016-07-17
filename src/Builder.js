@@ -1,9 +1,12 @@
 import ModelCollection from './ModelCollection';
 import Collection from 'js_collection';
-import jQuery from 'jquery';
 import DuplicateVariableException from "../src/Exceptions/DuplicateVariableException";
 import UnknownVariableException from "../src/Exceptions/UnknownVariableException";
 import clone  from 'clone';
+import HttpRequest from "./HttpRequest";
+import JqueryHttpDriver from "./HttpDrivers/JqueryHttpDriver";
+import HttpDriver from "./HttpDrivers/HttpDriver";
+import Model from "./Model";
 
 /**
  * A builder class for building query strings for a Filterable API.
@@ -13,9 +16,10 @@ export default class Builder
     /**
      * Constructor.
      *
-     * @param model
+     * @param {Model} model
+     * @param {HttpDriver} [driver=JqueryHttpDriver]
      */
-    constructor(model)
+    constructor(model, driver = JqueryHttpDriver)
     {
         this.model = model;
         
@@ -27,6 +31,8 @@ export default class Builder
             {"name": "limit", "value": 15},
             {"name": "page", "value": 1}
         ], 'name');
+
+        this._driver = driver;
     }
 
     /**
@@ -224,38 +230,35 @@ export default class Builder
     }
 
     /**
+     * Creates a new request object.
+     *
+     * @returns {HttpRequest}
+     * @private
+     */
+    _request() {
+        return new HttpRequest();
+    }
+
+    /**
      * Executes a query.
      *
      * @param {Function} success
      * @param {Function} error
      */
-    get(success, error)
+    get(success = () => {}, error = () => {})
     {
-        var instance = this;
-
-        jQuery.ajax({
-            headers:  { Accept: "application/json" },
-            dataType: 'json',
-            method: 'GET',
-            url: this.model.url + this.toQueryString(),
-            statusCode: {
-                500: function (response) {
-                    if(typeof error == 'function') {
-                        error(response, 500);
-                    }
-                },
-                422: function (response) {
-                    if(typeof error == 'function') {
-                        error(response, 500);
-                    }
-                },
-                200: function (payload) {
-                    var models = instance.encapsulateData(payload['data']);
-                    let collection = instance._collectData(models);
-                    success(collection, payload);
-                }
-            }
+        let request = this._request();
+        request.setHeader('Accept', 'application/json');
+        request.setDataType('json');
+        request.setMethod('GET');
+        request.setUrl(this.model.url + this.toQueryString());
+        request.onSuccess((payload) => {
+            var models = this.encapsulateData(payload['data']);
+            let collection = this._collectData(models);
+            success(collection, payload);
         });
+        request.onFailure(error);
+        this._driver.execute(request);
     }
 
     /**
