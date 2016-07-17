@@ -17,11 +17,13 @@ export default class JqueryHttpDriver extends HttpDriver {
         jQuery.ajax({
             headers: this._parseHeaders(request.getHeaders()),
             dataType: request.getDataType(),
+            data: request.getData(),
             method: request.getMethod(),
             url: request.getUrl(),
             statusCode: {
                 500: (response) => request.error(response, 500),
                 422: (response) => request.error(response, 422),
+                403: (response) => request.error(response, 403),
                 200: (response) => request.success(response, 200),
             }
         });

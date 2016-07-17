@@ -239,7 +239,10 @@ export default class Builder
      */
     static _request()
     {
-        return new HttpRequest();
+        let request = new HttpRequest();
+        request.setHeader('Accept', 'application/json');
+        request.setDataType('json');
+        return request;
     }
 
     /**
@@ -346,116 +349,60 @@ export default class Builder
     /**
      * Executes an update.
      *
-     * @param {Array|Object} attributes
-     * @param {function} success
-     * @param {function} error
+     * @param {{}} attributes
+     * @param {function} [success=() => {}]
+     * @param {function} [error=() => {}]
      */
-    update(attributes, success, error)
+    update(attributes, success = () => {}, error  = () => {})
     {
-        var instance = this;
-        jQuery.ajax({
-            headers:  { Accept: "application/json" },
-            dataType: 'json',
-            method: 'POST',
-            url: this.model.url + '/update' + this.toQueryString(),
-            data: attributes,
-            statusCode: {
-                500: function (response) {
-                    if(typeof error == 'function') {
-                        error(response, 500);
-                    }
-                },
-                422: function (response) {
-                    if(typeof error == 'function') {
-                        error(response, 422);
-                    }
-                },
-                200: function (payload) {
-                    if(typeof success == 'function') {
-                        var models = instance.encapsulateData(payload['data']);
-                        let collection = instance._collectData(models);
-                        success(collection, payload);
-                    }
-                }
-            }
+        let request = this._request();
+        request.setMethod('POST');
+        request.setUrl(`${this.model.url}/update${this.toQueryString()}`);
+        request.setData(attributes);
+        request.onSuccess((payload) => {
+            let models = this.encapsulateData(payload['data']);
+            let collection = this._collectData(models);
+            success(collection, payload);
         });
+        request.onFailure(error);
+        this._driver.execute(request);
     }
 
     /**
      * Executes an insert.
      *
      * @param {{}} attributes
-     * @param {Function} success
-     * @param {Function} error
+     * @param {function} [success=() => {}]
+     * @param {function} [error=() => {}]
      */
-    insert(attributes, success, error)
+    insert(attributes, success = () => {}, error  = () => {})
     {
-        var instance = this;
-        jQuery.ajax({
-            headers:  { Accept: "application/json" },
-            dataType: 'json',
-            method: 'POST',
-            url: this.model.url + '/store',
-            data: attributes,
-            statusCode: {
-                500: function (response) {
-                    if(typeof error == 'function') {
-                        error(response, 500);
-                    }
-                },
-                422: function (response) {
-                    if(typeof error == 'function') {
-                        error(response, 422);
-                    }
-                },
-                200: function (data) {
-                    if(typeof success == 'function') {
-                        let models = instance.encapsulateData([data])[0];
-                        success(models);
-                    }
-                }
-            }
-        });
+        let request = this._request();
+        request.setMethod('POST');
+        request.setUrl(`${this.model.url}/store`);
+        request.onSuccess((payload) => success(this.encapsulateData([payload])[0]));
+        request.setData(attributes);
+        request.onFailure(error);
+        this._driver.execute(request);
     }
 
     /**
      * Executes a delete.
      *
-     * @param {function} success
-     * @param {function} error
+     * @param {function} [success=() => {}]
+     * @param {function} [error=() => {}]
      */
-    deleteResults(success, error)
+    deleteResults(success = () => {}, error = () => {})
     {
-        var instance = this;
-        jQuery.ajax({
-            headers:  { Accept: "application/json" },
-            dataType: 'json',
-            method: 'POST',
-            url: this.model.url + '/delete' + this.toQueryString(),
-            statusCode: {
-                500: function (response) {
-                    if(typeof error == 'function') {
-                        error(response, 500);
-                    }
-                },
-                422: function (response) {
-                    if(typeof error == 'function') {
-                        error(response, 422);
-                    }
-                },
-                403: function() {
-                    if(typeof error == 'function') {
-                        error(null, 403);
-                    }
-                },
-                200: function (data) {
-                    if(typeof success == 'function') {
-                        let models = instance.encapsulateData(data);
-                        let collection = instance._collectData(models);
-                        success(collection);
-                    }
-                }
-            }
+        let request = this._request();
+        request.setMethod('POST');
+        request.setUrl(`${this.model.url}/delete${this.toQueryString()}`);
+        request.onSuccess((payload) => {
+            let models = this.encapsulateData(payload['data']);
+            let collection = this._collectData(models);
+            success(collection, payload);
         });
+        request.onFailure(error);
+        this._driver.execute(request);
     }
 }

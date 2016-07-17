@@ -9,6 +9,7 @@ export default class HttpRequest {
     constructor() {
         this._headers = [];
         this._data_type = 'json';
+        this._data = {};
         this._method = 'GET';
         this._url = '';
         this._success = () => {
@@ -54,6 +55,24 @@ export default class HttpRequest {
      */
     setDataType(data_type) {
         this._data_type = data_type;
+    };
+
+    /**
+     * Gets the data attached to a request.
+     *
+     * @returns {{}}
+     */
+    getData() {
+        return this._data;
+    }
+
+    /**
+     * Sets the data which should be passed attached to a request.
+     *
+     * @param {{}} data
+     */
+    setData(data) {
+        this._data = data;
     };
 
     /**
