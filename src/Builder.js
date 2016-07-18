@@ -232,6 +232,20 @@ export default class Builder
     }
 
     /**
+     * Sets the limit for a query to 1 and executes the query returning the first result.
+     *
+     * @param {Function} success
+     * @param {Function} error
+     * @returns {*}
+     */
+    first(success = () => {}, error = () => {})
+    {
+        return this.setLimit(1).get((results) => {
+            success(results.first())
+        }, error);
+    }
+
+    /**
      * Creates a new request object.
      *
      * @returns {HttpRequest}

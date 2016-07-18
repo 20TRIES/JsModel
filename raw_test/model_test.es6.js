@@ -3,6 +3,7 @@ import Model from "../src/Model";
 import DuplicateVariableException from "../src/Exceptions/DuplicateVariableException";
 import UnknownVariableException from "../src/Exceptions/UnknownVariableException";
 import chai from "chai/chai";
+import HttpDriver from "../src/HttpDrivers/HttpDriver";
 
 // Have to require sinon at the moment because relative paths within the package seem to be from the root of that
 // package and not the location of the current file; until a fix is found for this, import cannot be used.
@@ -260,5 +261,62 @@ suite('Builder', function() {
         builder.where(mock_constraint_name, {mock: 'mock'});
         builder.getConstraintValue(mock_constraint_name).mock = 'not mock';
         chai.assert.equal(JSON.stringify(builder.getConstraintValue(mock_constraint_name)), JSON.stringify(mock_constraint_value));
+    });
+
+    // FIRST
+    test('test_first_method_sets_limit_on_query', function () {
+        let driver = class extends HttpDriver {
+            static execute(request) {
+                chai.assert.notEqual(request.getUrl().search(/(\?|&)limit=1($|&)/), -1);
+            }
+        };
+        let model = class extends Model {
+            constructor(data = {}) {
+                super(data);
+                this.url = '';
+            }
+        };
+       (new Builder(model, driver)).first();
+    });
+    test('test_first_method_executes_query', function () {
+        var mock_return_value = false;
+        let driver = class extends HttpDriver {
+            static execute(request) {
+                mock_return_value = true;
+            }
+        };
+        let model = class extends Model {
+            constructor(data = {}) {
+                super(data);
+                this.url = '';
+            }
+        };
+        (new Builder(model, driver)).first();
+        chai.assert.equal(mock_return_value, true);
+    });
+    test('test_first_method_passes_callbacks_through_request', function () {
+        let success = sinon.spy();
+        let error = sinon.spy();
+        let driver = class extends HttpDriver {
+            static execute(request) {
+                request.success({data: []});
+                request.error();
+            }
+        };
+        (new Builder((new Model()), driver)).first(success, error);
+        chai.assert.equal(success.called, true);
+        chai.assert.equal(error.called, true);
+    });
+    test('test_first_method_returns_first_result_not_collection', function () {
+        let success = sinon.spy((data) => {
+            chai.assert.instanceOf(data, Model, "Expected callback to be passed a model instance");
+        });
+        let driver = class extends HttpDriver {
+            static execute(request) {
+                request.success({data: [{id: 1},{id: 2},{id: 3}]});
+            }
+        };
+        (new Builder((new Model()), driver)).first(success);
+        chai.assert.equal(success.called, true, 'Expected callback to be called');
     });
 });
