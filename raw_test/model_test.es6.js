@@ -4,6 +4,7 @@ import DuplicateVariableException from "../src/Exceptions/DuplicateVariableExcep
 import UnknownVariableException from "../src/Exceptions/UnknownVariableException";
 import chai from "chai/chai";
 import HttpDriver from "../src/HttpDrivers/HttpDriver";
+import HttpRequest from "../src/HttpRequest";
 
 // Have to require sinon at the moment because relative paths within the package seem to be from the root of that
 // package and not the location of the current file; until a fix is found for this, import cannot be used.
@@ -320,3 +321,16 @@ suite('Builder', function() {
         chai.assert.equal(success.called, true, 'Expected callback to be called');
     });
 });
+
+
+suite('HttpRequest', function() {
+
+    // SUCCESS
+    test('test_request_doesnt_change_the_original_value_of_this_within_closures_set_within_it', function () {
+        let request = new HttpRequest();
+        this.mock_name = 'mock_name';
+        request.onSuccess(() => this.mock_name);
+        chai.assert.equal(request.success(), this.mock_name);
+    });
+});
+

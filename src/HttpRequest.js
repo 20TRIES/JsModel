@@ -136,7 +136,7 @@ export default class HttpRequest {
      * @returns {*}
      */
     success(...args) {
-        return this._success.apply(this._success, args);
+        return this._success.apply(null, args);
     }
 
     /**
@@ -146,6 +146,6 @@ export default class HttpRequest {
      * @returns {*}
      */
     error(...args) {
-        return this._error.apply(this._error(), args);
+        return this._error.apply(null, args);
     }
 }
