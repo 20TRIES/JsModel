@@ -143,7 +143,7 @@ export default class Model {
      * @returns {*}
      */
     newCollection(data) {
-        return new ModelCollection(data, this.primary_key);
+        return new ModelCollection(data, this);
     }
 
     /**
