@@ -4,6 +4,10 @@ import DuplicateVariableException from "../src/Exceptions/DuplicateVariableExcep
 import UnknownVariableException from "../src/Exceptions/UnknownVariableException";
 import chai from "chai/chai";
 
+// Have to require sinon at the moment because relative paths within the package seem to be from the root of that
+// package and not the location of the current file; until a fix is found for this, import cannot be used.
+var sinon = require('sinon');
+
 suite('Model', function() {
 
     // ORDER BY
