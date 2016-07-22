@@ -201,9 +201,8 @@ export default class Model {
                         if (code == 422) {
                             instance.syncing = false;
                         }
-                        builder.handleError(response, code);
                         if (typeof error == 'function') {
-                            error();
+                            error(response, code);
                         }
                     }
                 })(this, error));
@@ -221,9 +220,8 @@ export default class Model {
                     if(code == 422) {
                         instance.syncing = false;
                     }
-                    builder.handleError(response, code);
                     if(typeof error == 'function') {
-                        error();
+                        error(response, code);
                     }
                 });
         }
@@ -275,9 +273,8 @@ export default class Model {
                             instance.syncing = false;
                             instance.reset();
                         }
-                        builder.handleError(response, code);
                         if (typeof error == 'function') {
-                            error();
+                            error(response, code);
                         }
                     }
                 })(error));
