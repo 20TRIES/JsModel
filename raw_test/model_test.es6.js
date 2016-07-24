@@ -84,9 +84,7 @@ suite('Model', function() {
         let model = new Model(mock_attributes);
         let clone = model.clone();
         clone.attributes.mock_attr = "other_mock_value";
-        clone.original.mock_attr = "other_mock_value";
         chai.assert.equal("mock_value", model.attributes.mock_attr);
-        chai.assert.equal("mock_value", model.original.mock_attr);
     });
 });
 
