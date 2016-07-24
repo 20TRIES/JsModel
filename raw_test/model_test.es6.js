@@ -28,6 +28,40 @@ suite('Model', function() {
         chai.assert.equal(JSON.stringify(model.dirty()), JSON.stringify(attributes));
     });
 
+
+    // ATTRIBUTE ACCESSORS
+    test('test_attributes_can_be_gotten_from_a_model', function () {
+        let MockDateMutatingModel = class extends Model {
+            constructor(data = {}) {
+                super(data);
+            }
+        };
+        let model = new MockDateMutatingModel({foo: 989});
+        chai.assert.equal(model.foo, 989);
+    });
+    test('test_attributes_can_be_set_to_a_model', function () {
+        let MockDateMutatingModel = class extends Model {
+            constructor(data = {}) {
+                super(data);
+            }
+        };
+        let model = new MockDateMutatingModel({foo: 989});
+        model.foo = 77;
+        chai.assert.equal(model.foo, 77);
+    });
+    test('test_attributes_are_cloned_before_being_incorporated_into_a_model', function () {
+        let MockDateMutatingModel = class extends Model {
+            constructor(data = {}) {
+                super(data);
+            }
+        };
+        let original = {bar: 989};
+        let model = new MockDateMutatingModel({foo: original});
+        original.bar = 77;
+        chai.assert.equal(model.foo.bar, 989);
+    });
+
+
     // DATE MUTATION
     test('test_dates_can_be_set_within_child_model_constuctor', function () {
         let MockDateMutatingModel = class extends Model {

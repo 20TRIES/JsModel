@@ -22,7 +22,7 @@ export default class Model {
         this.syncing = false;
         this.exists = false;
         this.dates = typeof this.dates == 'undefined' ? ['created_at', 'updated_at'] : this.dates;
-        this.hydrate(data);
+        this._hydrate(data);
     }
 
     /**
@@ -38,46 +38,41 @@ export default class Model {
     }
 
     /**
-     * Populates a new model with a set of data.
+     * Hydrates a new model instance with a set of data.
      *
-     * @param {Object} attributes
-     * @returns {Model}
+     * @param {{}} attributes
+     * @private
      */
-    hydrate(attributes) {
-        for(var key in attributes) {
-            this.attributes[key] = attributes[key];
-            var attribute_name = key;
-
-            if (this.exists) {
-                this.original[key] = attributes[key];
-            }
-
-            // Define getters and setters for the model.
+    _hydrate(attributes) {
+        let properties = {};
+        for(let key in attributes) {
             if(this.dates.indexOf(key) != -1) {
-                Object.defineProperty(this, key, {
+                properties[key] = {
                     "configurable": true,
                     "get": () => new Moment(this.attributes[key]),
                     "set": (value) => {
                         this.attributes[key] = value instanceof Moment ? value.format() : value;
                     }
-                });
+                };
             } else {
-                Object.defineProperty(this, key, {
+                properties[key] = {
                     "configurable": true,
-                    "get": (function(attribute_name) {
-                        return function() {
-                            return this.attributes[attribute_name];
-                        }
-                    })(attribute_name),
-                    "set": (function(attribute_name) {
-                        return function(value) {
-                            this.attributes[attribute_name] = value;
-                        }
-                    })(attribute_name)
-                });
+                    "get": (attribute) => this.attributes[key],
+                    "set": (value) => {
+                        this.attributes[key] = value instanceof Object ? clone(value) : value;
+                    }
+                };
             }
         }
-        return this;
+        Object.defineProperties(this, properties);
+
+        // Initialise the attribute values.
+        for(let key in attributes) {
+            this[key] = attributes[key];
+            if (this.exists) {
+                this.original[key] = attributes[key];
+            }
+        }
     }
 
     /**
@@ -181,7 +176,7 @@ export default class Model {
                         for(var key in results.items) {
                             var updated_contact = results.items[key];
                             if(updated_contact.customer_contact_id == instance.customer_contact_id) {
-                                instance.hydrate(updated_contact.attributes);
+                                instance._hydrate(updated_contact.attributes);
                             }
                         }
                         if(typeof success == 'function') {
@@ -202,7 +197,7 @@ export default class Model {
             builder.insert(attributes, function(model) {
                     instance.syncing = false;
                     instance.customer_contact_id = model.customer_contact_id;
-                    instance.hydrate(model.attributes);
+                    instance._hydrate(model.attributes);
                     instance.exists = true;
                     if (typeof success == 'function') {
                         success();
@@ -254,7 +249,7 @@ export default class Model {
                 .delete((function(success) {
                     return function(results) {
                         instance.syncing = false;
-                        instance.hydrate(results.first().attributes);
+                        instance._hydrate(results.first().attributes);
                         if(typeof success == 'function') {
                             success();
                         }
