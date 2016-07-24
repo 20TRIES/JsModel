@@ -55,6 +55,7 @@ export default class Model {
             // Define getters and setters for the model.
             if(this.dates.indexOf(key) != -1) {
                 Object.defineProperty(this, key, {
+                    "configurable": true,
                     "get": () => new Moment(this.attributes[key]),
                     "set": (value) => {
                         this.attributes[key] = value instanceof Moment ? value.format() : value;
