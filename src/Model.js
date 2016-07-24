@@ -1,7 +1,7 @@
 import Builder from "./Builder";
 import ModelCollection from "./ModelCollection";
 import clone  from 'clone';
-
+import Moment from 'moment/moment';
 
 /**
  * A base Model class.
@@ -21,7 +21,7 @@ export default class Model {
         this.attributes = {};
         this.syncing = false;
         this.exists = false;
-        this.dates = ['created_at', 'updated_at'];
+        this.dates = typeof this.dates == 'undefined' ? ['created_at', 'updated_at'] : this.dates;
         this.hydrate(data);
     }
 
@@ -56,11 +56,7 @@ export default class Model {
             if(this.dates.indexOf(key) != -1) {
                 Object.defineProperty(this, key, {
                     "configurable": true,
-                    "get": (function(attribute_name) {
-                        return function() {
-                            return moment(this.attributes[attribute_name]);
-                        }
-                    })(attribute_name),
+                    "get": () => new Moment(this.attributes[key]),
                     "set": (function(attribute_name) {
                         return function(value) {
                             if(typeof value._isAMomentObject != 'undefined' && value._isAMomentObject == true) {

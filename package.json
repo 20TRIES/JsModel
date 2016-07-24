@@ -25,7 +25,8 @@
   "dependencies": {
     "js_collection": "^0.0.*",
     "jquery": "^3.0.*",
-    "clone": "^1.0.*"
+    "clone": "^1.0.*",
+    "moment": "^2.14.*"
   },
   "devDependencies": {
     "mocha": "^2.5.*",

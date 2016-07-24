@@ -5,6 +5,7 @@ import UnknownVariableException from "../src/Exceptions/UnknownVariableException
 import chai from "chai/chai";
 import HttpDriver from "../src/HttpDrivers/HttpDriver";
 import HttpRequest from "../src/HttpRequest";
+import Moment from 'moment/moment';
 
 // Have to require sinon at the moment because relative paths within the package seem to be from the root of that
 // package and not the location of the current file; until a fix is found for this, import cannot be used.
@@ -25,6 +26,34 @@ suite('Model', function() {
         };
         let model = new Model(attributes);
         chai.assert.equal(JSON.stringify(model.dirty()), JSON.stringify(attributes));
+    });
+
+    // DATE MUTATION
+    test('test_dates_can_be_set_within_child_model_constuctor', function () {
+        let MockDateMutatingModel = class extends Model {
+            constructor(data = {}) {
+                this.dates = ['foo'];
+                super(data);
+            }
+        };
+        let dates = (new MockDateMutatingModel()).dates;
+        chai.assert.equal(JSON.stringify(dates), JSON.stringify(['foo']));
+    });
+    test('test_dates_are_mutated_to_instances_of_moment_js', function () {
+        let MockDateMutatingModel = class extends Model {
+            constructor(data = {}) {
+                this.dates = ['foo'];
+                super(data);
+            }
+        };
+        let model = new MockDateMutatingModel({'foo': '2016-07-24 15:16:56'});
+        chai.assert.instanceOf(model.foo, Moment);
+        chai.assert.equal(model.foo.year(), 2016);
+        chai.assert.equal(model.foo.month() + 1, 7);
+        chai.assert.equal(model.foo.date(), 24);
+        chai.assert.equal(model.foo.hour(), 15);
+        chai.assert.equal(model.foo.minute(), 16);
+        chai.assert.equal(model.foo.second(), 56);
     });
 
     // ORDER BY
