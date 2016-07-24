@@ -124,7 +124,7 @@ export default class Model {
      * @returns {ModelCollection}
      */
     find(id, success, error) {
-        return this.where(this.primary_key, id).get(success, error);
+        return this.where(this.primary_key, id).first(success, error);
     }
 
     /**
