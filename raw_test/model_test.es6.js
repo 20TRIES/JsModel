@@ -56,6 +56,41 @@ suite('Model', function() {
         chai.assert.equal(result.minute(), 16);
         chai.assert.equal(result.second(), 56);
     });
+    test('test_date_can_be_set_by_string', function () {
+        let MockDateMutatingModel = class extends Model {
+            constructor(data = {foo: null}) {
+                this.dates = ['foo'];
+                super(data);
+            }
+        };
+        let model = new MockDateMutatingModel();
+        model.foo = '2016-07-24T15:16:56';
+        let result = model.foo;
+        chai.assert.instanceOf(result, Moment);
+        chai.assert.equal(result.year(), 2016);
+        chai.assert.equal(result.month() + 1, 7);
+        chai.assert.equal(result.date(), 24);
+        chai.assert.equal(result.hour(), 15);
+        chai.assert.equal(result.minute(), 16);
+        chai.assert.equal(result.second(), 56);
+    });
+    test('test_date_can_be_set_by_moment', function () {
+        let MockDateMutatingModel = class extends Model {
+            constructor(data = {}) {
+                this.dates = ['foo'];
+                super(data);
+            }
+        };
+        let model = new MockDateMutatingModel();
+        model.foo = new Moment('2016-07-24 15:16:56');
+        let result = model.foo;
+        chai.assert.instanceOf(result, Moment);
+        chai.assert.equal(result.year(), 2016);
+        chai.assert.equal(result.month() + 1, 7);
+        chai.assert.equal(result.date(), 24);
+        chai.assert.equal(result.hour(), 15);
+        chai.assert.equal(result.minute(), 16);
+        chai.assert.equal(result.second(), 56);
     });
 
     // ORDER BY

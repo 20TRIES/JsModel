@@ -57,15 +57,9 @@ export default class Model {
                 Object.defineProperty(this, key, {
                     "configurable": true,
                     "get": () => new Moment(this.attributes[key]),
-                    "set": (function(attribute_name) {
-                        return function(value) {
-                            if(typeof value._isAMomentObject != 'undefined' && value._isAMomentObject == true) {
-                                this.attributes[attribute_name] = value.format();
-                            } else {
-                                this.attributes[attribute_name] = value;
-                            }
-                        }
-                    })(attribute_name)
+                    "set": (value) => {
+                        this.attributes[key] = value instanceof Moment ? value.format() : value;
+                    }
                 });
             } else {
                 Object.defineProperty(this, key, {
