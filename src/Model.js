@@ -47,8 +47,11 @@ export default class Model {
     hydrate(attributes) {
         for(var key in attributes) {
             this.attributes[key] = attributes[key];
-            this.original[key] = attributes[key];
             var attribute_name = key;
+
+            if (this.exists) {
+                this.original[key] = attributes[key];
+            }
 
             // Define getters and setters for the model.
             if(this.dates.indexOf(key) != -1) {

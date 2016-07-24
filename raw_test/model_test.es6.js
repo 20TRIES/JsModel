@@ -12,6 +12,21 @@ var sinon = require('sinon');
 
 suite('Model', function() {
 
+    // DIRTY
+    test('test_dirty_method_exists', function () {
+        chai.assert.isFunction((new Model()).dirty);
+    });
+    test('test_new_model_that_does_not_exist_is_all_dirty', function () {
+        let attributes = {
+            id: 5,
+            first_name: "Marcus",
+            last_name: "Turner",
+            age: 24,
+        };
+        let model = new Model(attributes);
+        chai.assert.equal(JSON.stringify(model.dirty()), JSON.stringify(attributes));
+    });
+
     // ORDER BY
     test('test_order_by_is_shortcut_to_builder_method', function () {
         let mock_attribute = 'mock_var_name';
