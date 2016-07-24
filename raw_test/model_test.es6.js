@@ -47,13 +47,15 @@ suite('Model', function() {
             }
         };
         let model = new MockDateMutatingModel({'foo': '2016-07-24 15:16:56'});
-        chai.assert.instanceOf(model.foo, Moment);
-        chai.assert.equal(model.foo.year(), 2016);
-        chai.assert.equal(model.foo.month() + 1, 7);
-        chai.assert.equal(model.foo.date(), 24);
-        chai.assert.equal(model.foo.hour(), 15);
-        chai.assert.equal(model.foo.minute(), 16);
-        chai.assert.equal(model.foo.second(), 56);
+        let result = model.foo;
+        chai.assert.instanceOf(result, Moment);
+        chai.assert.equal(result.year(), 2016);
+        chai.assert.equal(result.month() + 1, 7);
+        chai.assert.equal(result.date(), 24);
+        chai.assert.equal(result.hour(), 15);
+        chai.assert.equal(result.minute(), 16);
+        chai.assert.equal(result.second(), 56);
+    });
     });
 
     // ORDER BY
