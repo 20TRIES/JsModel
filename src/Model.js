@@ -21,7 +21,6 @@ export default class Model {
         this.attributes = {};
         this.syncing = false;
         this.exists = false;
-        this.default_attributes = {};
         this.dates = ['created_at', 'updated_at'];
         this.hydrate(data);
     }
