@@ -394,7 +394,7 @@ export default class Builder
         let request = this.constructor._newRequest();
         request.setMethod('POST');
         request.setUrl(`${this.model.url}/store`);
-        request.onSuccess((payload) => success(this.encapsulateData([payload])[0]));
+        request.onSuccess((payload) => success(this.encapsulateData(payload['data'])[0]));
         request.setData(attributes);
         request.onFailure(error);
         this._driver.execute(request);
