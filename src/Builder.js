@@ -370,6 +370,7 @@ export default class Builder
     update(attributes, success = () => {}, error  = () => {})
     {
         let request = this.constructor._newRequest();
+        request.setDataType('json');
         request.setMethod('POST');
         request.setUrl(`${this.model.url}/update${this.toQueryString()}`);
         request.setData(attributes);
@@ -392,6 +393,7 @@ export default class Builder
     insert(attributes, success = () => {}, error  = () => {})
     {
         let request = this.constructor._newRequest();
+        request.setDataType('json');
         request.setMethod('POST');
         request.setUrl(`${this.model.url}/store`);
         request.onSuccess((payload) => success(this.encapsulateData(payload['data'])[0]));
@@ -409,6 +411,7 @@ export default class Builder
     deleteResults(success = () => {}, error = () => {})
     {
         let request = this.constructor._newRequest();
+        request.setDataType('json');
         request.setMethod('POST');
         request.setUrl(`${this.model.url}/delete${this.toQueryString()}`);
         request.onSuccess((payload) => {
