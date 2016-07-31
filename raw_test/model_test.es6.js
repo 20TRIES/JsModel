@@ -49,17 +49,6 @@ suite('Model', function() {
         model.foo = 77;
         chai.assert.equal(model.foo, 77);
     });
-    test('test_attributes_are_cloned_before_being_incorporated_into_a_model', function () {
-        let MockDateMutatingModel = class extends Model {
-            constructor(data = {}) {
-                super(data);
-            }
-        };
-        let original = {bar: 989};
-        let model = new MockDateMutatingModel({foo: original});
-        original.bar = 77;
-        chai.assert.equal(model.foo.bar, 989);
-    });
 
 
     // DATE MUTATION

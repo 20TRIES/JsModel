@@ -59,7 +59,7 @@ export default class Model {
                     "configurable": true,
                     "get": (attribute) => this.attributes[key],
                     "set": (value) => {
-                        this.attributes[key] = value instanceof Object ? clone(value) : value;
+                        this.attributes[key] = value;
                     }
                 };
             }
