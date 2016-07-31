@@ -2,6 +2,7 @@ import Builder from "./Builder";
 import ModelCollection from "./ModelCollection";
 import clone  from 'clone';
 import Moment from 'moment/moment';
+import Str from 'string';
 
 /**
  * A base Model class.
@@ -43,7 +44,8 @@ export default class Model {
      * @param {{}} attributes
      * @private
      */
-    _hydrate(attributes) {
+    _hydrate(attributes)
+    {
         // Initialise the attribute values.
         for(let key in attributes) {
             this.attributes[key] = attributes[key];
@@ -55,19 +57,21 @@ export default class Model {
         // Define accessors and mutators
         let properties = {};
         for(let key in attributes) {
+            let accessor = this[new Str(`get_${key}_attribute`).camelize()];
+            let mutator = this[new Str(`set_${key}_attribute`).camelize()];
             if(this.dates.indexOf(key) != -1) {
                 properties[key] = {
                     "configurable": true,
-                    "get": () => new Moment(this.attributes[key]),
-                    "set": (value) => {
+                    "get": accessor instanceof Function ? accessor : () => new Moment(this.attributes[key]),
+                    "set": mutator instanceof Function ? mutator : (value) => {
                         this.attributes[key] = value instanceof Moment ? value.format() : value;
                     }
                 };
             } else {
                 properties[key] = {
                     "configurable": true,
-                    "get": (attribute) => this.attributes[key],
-                    "set": (value) => {
+                    "get": accessor instanceof Function ? accessor : () => this.attributes[key],
+                    "set": mutator instanceof Function ? mutator : (value) => {
                         this.attributes[key] = value;
                     }
                 };

@@ -39,6 +39,21 @@ suite('Model', function() {
         let model = new MockDateMutatingModel({foo: 989});
         chai.assert.equal(model.foo, 989);
     });
+    test('test_accessor_can_be_defined', function () {
+        let MockDateMutatingModel = class extends Model {
+            constructor(data = {}) {
+                super(data);
+            }
+            getFooAttribute() {
+                return 'foo';
+            }
+        };
+        let model = new MockDateMutatingModel({foo: 'bar'});
+        chai.assert.equal(model.foo, 'foo');
+    });
+
+    
+    // ATTRIBUTE MUTATORS
     test('test_attributes_can_be_set_to_a_model', function () {
         let MockDateMutatingModel = class extends Model {
             constructor(data = {}) {
@@ -48,6 +63,19 @@ suite('Model', function() {
         let model = new MockDateMutatingModel({foo: 989});
         model.foo = 77;
         chai.assert.equal(model.foo, 77);
+    });
+    test('test_mutator_can_be_defined', function () {
+        let MockDateMutatingModel = class extends Model {
+            constructor(data = {}) {
+                super(data);
+            }
+            setFooAttribute(value) {
+                this.attributes.foo = value;
+            }
+        };
+        let model = new MockDateMutatingModel({foo: 'bar'});
+        model.foo = 'foo';
+        chai.assert.equal(model.foo, 'foo');
     });
 
 
