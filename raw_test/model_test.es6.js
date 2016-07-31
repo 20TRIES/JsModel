@@ -13,6 +13,17 @@ var sinon = require('sinon');
 
 suite('Model', function() {
 
+    // MODEL CONSTRUCTION
+    test('test_attributes_set_within_nested_attributes_object', function () {
+        let attributes = {
+            id: 5,
+            first_name: "Marcus",
+            last_name: "Turner",
+            age: 24,
+        };
+        chai.assert.equal(JSON.stringify((new Model(attributes)).attributes), JSON.stringify(attributes));
+    });
+
     // DIRTY
     test('test_dirty_method_exists', function () {
         chai.assert.isFunction((new Model()).dirty);
