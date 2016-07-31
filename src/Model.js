@@ -44,6 +44,15 @@ export default class Model {
      * @private
      */
     _hydrate(attributes) {
+        // Initialise the attribute values.
+        for(let key in attributes) {
+            this[key] = attributes[key];
+            if (this.exists) {
+                this.original[key] = attributes[key];
+            }
+        }
+
+        // Define accessors and mutators
         let properties = {};
         for(let key in attributes) {
             if(this.dates.indexOf(key) != -1) {
@@ -65,14 +74,6 @@ export default class Model {
             }
         }
         Object.defineProperties(this, properties);
-
-        // Initialise the attribute values.
-        for(let key in attributes) {
-            this[key] = attributes[key];
-            if (this.exists) {
-                this.original[key] = attributes[key];
-            }
-        }
     }
 
     /**
