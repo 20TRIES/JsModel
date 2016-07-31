@@ -12,7 +12,7 @@ export default class JsModelException{
         /**
          * @type {String}
          */
-        this.message = message;
+        this._message = message;
     }
 
     /**
@@ -21,6 +21,6 @@ export default class JsModelException{
      * @return {String}
      */
     toString() {
-        return this.message;
+        return this._message;
     }
 }
