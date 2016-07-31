@@ -486,13 +486,7 @@ suite('Builder', function() {
                 chai.assert.notEqual(request.getUrl().search(/(\?|&)limit=1($|&)/), -1);
             }
         };
-        let model = class extends Model {
-            constructor(data = {}) {
-                super(data);
-                this._url = '';
-            }
-        };
-       (new Builder(model, driver)).first();
+       (new Builder(new Model(), driver)).first();
     });
     test('test_first_method_executes_query', function () {
         var mock_return_value = false;
@@ -501,13 +495,7 @@ suite('Builder', function() {
                 mock_return_value = true;
             }
         };
-        let model = class extends Model {
-            constructor(data = {}) {
-                super(data);
-                this._url = '';
-            }
-        };
-        (new Builder(model, driver)).first();
+        (new Builder(new Model(), driver)).first();
         chai.assert.equal(mock_return_value, true);
     });
     test('test_first_method_passes_callbacks_through_request', function () {

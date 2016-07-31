@@ -16,7 +16,7 @@ export default class ModelCollection extends Collection
     {
         super(items, model.getPrimaryKey());
 
-        this.model = model;
+        this._model = model;
     }
 
     /**

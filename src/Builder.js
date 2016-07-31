@@ -21,13 +21,13 @@ export default class Builder
      */
     constructor(model, driver = JqueryHttpDriver)
     {
-        this.model = model;
+        this._model = model;
         
         this._constraints = new Collection([
             // {filter: "filter_name", value: "filter_value"}
         ], 'filter');
 
-        this.appends = new Collection([
+        this._appends = new Collection([
             {"name": "limit", "value": 15},
             {"name": "page", "value": 1}
         ], 'name');
@@ -96,7 +96,7 @@ export default class Builder
      */
     getLimit()
     {
-        return this.hasVariable('limit') ? this.appends.get('limit').value : -1;
+        return this.hasVariable('limit') ? this._appends.get('limit').value : -1;
     }
 
     /**
@@ -122,7 +122,7 @@ export default class Builder
      */
     currentPage()
     {
-        return this.appends.get('page').value;
+        return this._appends.get('page').value;
     }
 
     /**
@@ -132,7 +132,7 @@ export default class Builder
      */
     setPage(page)
     {
-        this.appends.get('page').value = page;
+        this._appends.get('page').value = page;
         return this;
     }
 
@@ -166,7 +166,7 @@ export default class Builder
         if(this.hasVariable(name)) {
             throw new DuplicateVariableException(`Variable "${name}" has already been appended!`);
         } else {
-            this.appends.push({'name': name, 'value': value});
+            this._appends.push({'name': name, 'value': value});
         }
         return this;
     }
@@ -179,7 +179,7 @@ export default class Builder
      */
     hasVariable(name)
     {
-        return this.appends.get(name) != null;
+        return this._appends.get(name) != null;
     }
 
     /**
@@ -191,7 +191,7 @@ export default class Builder
      */
     getVariable(name, default_result = null)
     {
-        return this.hasVariable(name) ? this.appends.get(name).value : default_result;
+        return this.hasVariable(name) ? this._appends.get(name).value : default_result;
     }
 
     /**
@@ -204,7 +204,7 @@ export default class Builder
     updateVariable(name, value)
     {
         if(this.hasVariable(name)) {
-            this.appends.get(name).value = value;
+            this._appends.get(name).value = value;
         } else {
             throw new UnknownVariableException(`Cannot update unknown variable with name "${name}"!`);
         }
@@ -271,9 +271,9 @@ export default class Builder
         request.setHeader('Accept', 'application/json');
         request.setDataType('json');
         request.setMethod('GET');
-        request.setUrl(this.model.getUrl() + this.toQueryString());
+        request.setUrl(this._model.getUrl() + this.toQueryString());
         request.onSuccess((payload) => {
-            var models = this.encapsulateData(payload['data']);
+            var models = this._encapsulateData(payload['data']);
             let collection = this._collectData(models);
             success(collection, payload);
         });
@@ -297,7 +297,7 @@ export default class Builder
             first = false;
         });
 
-        this.appends.each((key, item) => {
+        this._appends.each((key, item) => {
             if(item.value instanceof Array) {
                 for(let i=0; i < item.value.length; ++i) {
                     query_string += (first ? '?' : '&');
@@ -320,13 +320,13 @@ export default class Builder
     }
 
     /**
-     * Encapsulates a collection of data within a new instance of the model that belongs
+     * Encapsulates a collection of data within a new instance of the _model that belongs
      * to a Builder.
      *
      * @param {Array} items
      * @returns {Array}
      */
-    encapsulateData(items)
+    _encapsulateData(items)
     {
         for(let i=0; i < items.length; ++i) {
             items[i] = this.newModel(items[i]);
@@ -344,20 +344,20 @@ export default class Builder
      */
     _collectData(models)
     {
-        let collection = this.model.newCollection(models);
+        let collection = this._model.newCollection(models);
         collection.setQuery(this);
         return collection;
     }
 
     /**
-     * Creates a new model.
+     * Creates a new _model.
      *
      * @param {*} data
      * @returns {*}
      */
     newModel(data)
     {
-        return new this.model.constructor(data);
+        return new this._model.constructor(data);
     }
 
     /**
@@ -372,10 +372,10 @@ export default class Builder
         let request = this.constructor._newRequest();
         request.setDataType('json');
         request.setMethod('POST');
-        request.setUrl(`${this.model.getUrl()}/update${this.toQueryString()}`);
+        request.setUrl(`${this._model.getUrl()}/update${this.toQueryString()}`);
         request.setData(attributes);
         request.onSuccess((payload) => {
-            let models = this.encapsulateData(payload['data']);
+            let models = this._encapsulateData(payload['data']);
             let collection = this._collectData(models);
             success(collection, payload);
         });
@@ -395,8 +395,8 @@ export default class Builder
         let request = this.constructor._newRequest();
         request.setDataType('json');
         request.setMethod('POST');
-        request.setUrl(`${this.model.getUrl()}/store`);
-        request.onSuccess((payload) => success(this.encapsulateData(payload['data'])[0]));
+        request.setUrl(`${this._model.getUrl()}/store`);
+        request.onSuccess((payload) => success(this._encapsulateData(payload['data'])[0]));
         request.setData(attributes);
         request.onFailure(error);
         this._driver.execute(request);
@@ -413,9 +413,9 @@ export default class Builder
         let request = this.constructor._newRequest();
         request.setDataType('json');
         request.setMethod('POST');
-        request.setUrl(`${this.model.getUrl()}/delete${this.toQueryString()}`);
+        request.setUrl(`${this._model.getUrl()}/delete${this.toQueryString()}`);
         request.onSuccess((payload) => {
-            let models = this.encapsulateData(payload['data']);
+            let models = this._encapsulateData(payload['data']);
             let collection = this._collectData(models);
             success(collection, payload);
         });
