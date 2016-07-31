@@ -46,7 +46,7 @@ export default class Model {
     _hydrate(attributes) {
         // Initialise the attribute values.
         for(let key in attributes) {
-            this[key] = attributes[key];
+            this.attributes[key] = attributes[key];
             if (this.exists) {
                 this.original[key] = attributes[key];
             }
