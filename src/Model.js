@@ -62,7 +62,9 @@ export default class Model {
             if(this.dates.indexOf(key) != -1) {
                 properties[key] = {
                     "configurable": true,
-                    "get": accessor instanceof Function ? accessor : () => new Moment(this.attributes[key]),
+                    "get": accessor instanceof Function ? accessor : ((attribute_name) => {
+                        return new Moment(this.attributes[attribute_name]);
+                    }).bind(this, [key]),
                     "set": mutator instanceof Function ? mutator : (value) => {
                         this.attributes[key] = value instanceof Moment ? value.format() : value;
                     }
@@ -70,10 +72,12 @@ export default class Model {
             } else {
                 properties[key] = {
                     "configurable": true,
-                    "get": accessor instanceof Function ? accessor : () => this.attributes[key],
-                    "set": mutator instanceof Function ? mutator : (value) => {
+                    "get": accessor instanceof Function ? accessor : ((attribute_name) => {
+                        return this.attributes[attribute_name];
+                    }).bind(this, [key]),
+                    "set": (mutator instanceof Function ? mutator : (value) => {
                         this.attributes[key] = value;
-                    }
+                    }),
                 };
             }
         }

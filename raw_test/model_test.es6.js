@@ -42,13 +42,17 @@ suite('Model', function() {
 
     // ATTRIBUTE ACCESSORS
     test('test_attributes_can_be_gotten_from_a_model', function () {
-        let MockDateMutatingModel = class extends Model {
-            constructor(data = {}) {
-                super(data);
-            }
-        };
-        let model = new MockDateMutatingModel({foo: 989});
-        chai.assert.equal(model.foo, 989);
+        let MockDateMutatingModel = class extends Model {};
+        let model = new MockDateMutatingModel({
+            id: 5,
+            first_name: "Marcus",
+            last_name: "Turner",
+            age: 24,
+        });
+        chai.assert.equal(model.id, 5);
+        chai.assert.equal(model.first_name, "Marcus");
+        chai.assert.equal(model.last_name, "Turner");
+        chai.assert.equal(model.age, 24);
     });
     test('test_accessor_can_be_defined', function () {
         let MockDateMutatingModel = class extends Model {
