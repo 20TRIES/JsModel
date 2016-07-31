@@ -14,7 +14,7 @@ export default class ModelCollection extends Collection
      */
     constructor(items, model) 
     {
-        super(items, model.primary_key);
+        super(items, model.getPrimaryKey());
 
         this.model = model;
     }

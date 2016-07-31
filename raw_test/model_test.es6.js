@@ -6,6 +6,7 @@ import chai from "chai/chai";
 import HttpDriver from "../src/HttpDrivers/HttpDriver";
 import HttpRequest from "../src/HttpRequest";
 import Moment from 'moment/moment';
+import Str from 'string';
 
 // Have to require sinon at the moment because relative paths within the package seem to be from the root of that
 // package and not the location of the current file; until a fix is found for this, import cannot be used.
@@ -21,7 +22,39 @@ suite('Model', function() {
             last_name: "Turner",
             age: 24,
         };
-        chai.assert.equal(JSON.stringify((new Model(attributes)).attributes), JSON.stringify(attributes));
+        chai.assert.equal(JSON.stringify((new Model(attributes))._attributes), JSON.stringify(attributes));
+    });
+
+    // SYNCHRONIZATION
+    test('test_get_is_syncing_returns_the_models_syncing_attribute', function () {
+        let model = new Model();
+        model._syncing = true;
+        chai.assert.equal(model.isSyncing(), true);
+        model._syncing = false;
+        chai.assert.equal(model.isSyncing(), false);
+    });
+
+    // EXISTS
+    test('test_exists_returns_the_exists_attribute', function () {
+        let model = new Model();
+        model._exists = true;
+        chai.assert.equal(model.exists(), true);
+        model._exists = false;
+        chai.assert.equal(model.exists(), false);
+    });
+
+    // PRIMARY KEY
+    test('test_get_primary_key_returns_the_models_primary_key_attribute_name', function () {
+        let model = new Model();
+        model._primary_key = 'foo_key';
+        chai.assert.equal(model.getPrimaryKey(), 'foo_key');
+    });
+
+    // URL
+    test('test_get_url_returns_the_models_url', function () {
+        let model = new Model();
+        model._url = 'foo_url';
+        chai.assert.equal(model.getUrl(), 'foo_url');
     });
 
     // DIRTY
@@ -66,6 +99,43 @@ suite('Model', function() {
         let model = new MockDateMutatingModel({foo: 'bar'});
         chai.assert.equal(model.foo, 'foo');
     });
+    test('test_get_attributes_returns_all_attributes', function() {
+        let attributes = {
+            id: 5,
+            first_name: "Marcus",
+            last_name: "Turner",
+            age: 24,
+        };
+        let model = new Model(attributes);
+        chai.assert.equal(JSON.stringify(model.getAttributes()), JSON.stringify(attributes));
+    });
+    test('test_get_attributes_returns_mutated_values', function() {
+        let attributes = {
+            id: 5,
+            first_name: "marcus",
+            last_name: "Turner",
+            age: 24,
+        };
+        let MockDateMutatingModel = class extends Model {
+            getFirstNameAttribute() {
+                return new Str(this._attributes.first_name).capitalize().toString();
+            }
+        };
+        let model = new MockDateMutatingModel(attributes);
+        let model_attributes = model.getAttributes();
+        chai.assert.equal(model_attributes.first_name, 'Marcus');
+    });
+    test('test_attributes_cannot_be_changed_through_results_of_get_attributes', function() {
+        let attributes = {
+            id: 5,
+            first_name: "Marcus",
+            last_name: "Turner",
+            age: 24,
+        };
+        let model = new Model(attributes);
+        model.getAttributes().id = 0;
+        chai.assert.equal(model.id, 5);
+    });
 
     
     // ATTRIBUTE MUTATORS
@@ -85,7 +155,7 @@ suite('Model', function() {
                 super(data);
             }
             setFooAttribute(value) {
-                this.attributes.foo = value;
+                this._attributes.foo = value;
             }
         };
         let model = new MockDateMutatingModel({foo: 'bar'});
@@ -98,17 +168,17 @@ suite('Model', function() {
     test('test_dates_can_be_set_within_child_model_constuctor', function () {
         let MockDateMutatingModel = class extends Model {
             constructor(data = {}) {
-                this.dates = ['foo'];
+                this._dates = ['foo'];
                 super(data);
             }
         };
-        let dates = (new MockDateMutatingModel()).dates;
+        let dates = (new MockDateMutatingModel())._dates;
         chai.assert.equal(JSON.stringify(dates), JSON.stringify(['foo']));
     });
     test('test_dates_are_mutated_to_instances_of_moment_js', function () {
         let MockDateMutatingModel = class extends Model {
             constructor(data = {}) {
-                this.dates = ['foo'];
+                this._dates = ['foo'];
                 super(data);
             }
         };
@@ -125,7 +195,7 @@ suite('Model', function() {
     test('test_date_can_be_set_by_string', function () {
         let MockDateMutatingModel = class extends Model {
             constructor(data = {foo: null}) {
-                this.dates = ['foo'];
+                this._dates = ['foo'];
                 super(data);
             }
         };
@@ -143,7 +213,7 @@ suite('Model', function() {
     test('test_date_can_be_set_by_moment', function () {
         let MockDateMutatingModel = class extends Model {
             constructor(data = {}) {
-                this.dates = ['foo'];
+                this._dates = ['foo'];
                 super(data);
             }
         };
@@ -172,22 +242,22 @@ suite('Model', function() {
     test('test_clone_method', function () {
         let mock_attributes = {"mock_attr": "mock_value"};
         let model = new Model(mock_attributes);
-        model.exists = true;
-        model.syncing = true;
-        model.original = 'mock_orginal';
+        model._exists = true;
+        model._syncing = true;
+        model._original = 'mock_orginal';
         let clone = model.clone();
-        chai.assert.equal(true, clone.syncing);
-        chai.assert.equal(JSON.stringify(mock_attributes), JSON.stringify(clone.attributes));
+        chai.assert.equal(true, clone._syncing);
+        chai.assert.equal(JSON.stringify(mock_attributes), JSON.stringify(clone._attributes));
         chai.assert.equal("mock_value", clone["mock_attr"]);
-        chai.assert.equal(true, clone.exists);
-        chai.assert.equal('mock_orginal', clone.original);
+        chai.assert.equal(true, clone._exists);
+        chai.assert.equal('mock_orginal', clone._original);
     });
     test('test_clone_deep_clones', function () {
         let mock_attributes = {mock_attr: "mock_value"};
         let model = new Model(mock_attributes);
         let clone = model.clone();
-        clone.attributes.mock_attr = "other_mock_value";
-        chai.assert.equal("mock_value", model.attributes.mock_attr);
+        clone._attributes.mock_attr = "other_mock_value";
+        chai.assert.equal("mock_value", model._attributes.mock_attr);
     });
 });
 
@@ -419,7 +489,7 @@ suite('Builder', function() {
         let model = class extends Model {
             constructor(data = {}) {
                 super(data);
-                this.url = '';
+                this._url = '';
             }
         };
        (new Builder(model, driver)).first();
@@ -434,7 +504,7 @@ suite('Builder', function() {
         let model = class extends Model {
             constructor(data = {}) {
                 super(data);
-                this.url = '';
+                this._url = '';
             }
         };
         (new Builder(model, driver)).first();

@@ -271,7 +271,7 @@ export default class Builder
         request.setHeader('Accept', 'application/json');
         request.setDataType('json');
         request.setMethod('GET');
-        request.setUrl(this.model.url + this.toQueryString());
+        request.setUrl(this.model.getUrl() + this.toQueryString());
         request.onSuccess((payload) => {
             var models = this.encapsulateData(payload['data']);
             let collection = this._collectData(models);
@@ -330,7 +330,7 @@ export default class Builder
     {
         for(let i=0; i < items.length; ++i) {
             items[i] = this.newModel(items[i]);
-            items[i].exists = true;
+            items[i]._exists = true;
         }
         return items;
     }
@@ -372,7 +372,7 @@ export default class Builder
         let request = this.constructor._newRequest();
         request.setDataType('json');
         request.setMethod('POST');
-        request.setUrl(`${this.model.url}/update${this.toQueryString()}`);
+        request.setUrl(`${this.model.getUrl()}/update${this.toQueryString()}`);
         request.setData(attributes);
         request.onSuccess((payload) => {
             let models = this.encapsulateData(payload['data']);
@@ -395,7 +395,7 @@ export default class Builder
         let request = this.constructor._newRequest();
         request.setDataType('json');
         request.setMethod('POST');
-        request.setUrl(`${this.model.url}/store`);
+        request.setUrl(`${this.model.getUrl()}/store`);
         request.onSuccess((payload) => success(this.encapsulateData(payload['data'])[0]));
         request.setData(attributes);
         request.onFailure(error);
@@ -413,7 +413,7 @@ export default class Builder
         let request = this.constructor._newRequest();
         request.setDataType('json');
         request.setMethod('POST');
-        request.setUrl(`${this.model.url}/delete${this.toQueryString()}`);
+        request.setUrl(`${this.model.getUrl()}/delete${this.toQueryString()}`);
         request.onSuccess((payload) => {
             let models = this.encapsulateData(payload['data']);
             let collection = this._collectData(models);
