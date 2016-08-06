@@ -147,6 +147,17 @@ export default class Model {
     }
 
     /**
+     * Determines whether an attribute originally exists on a model.
+     *
+     * @param {string} name
+     * @returns {boolean}
+     */
+    hasOriginal(name)
+    {
+        return typeof this._.original[name] !== 'undefined';
+    }
+
+    /**
      * Gets the names of the attributes within a model that have been specified as a date attribute.
      *
      * @returns {Array}
@@ -337,16 +348,24 @@ export default class Model {
     }
 
     /**
-     * Resets a models attributes to their original values.
+     * Resets a model's data to it's original values.
      */
     reset()
     {
-        for(var key in this.getAttributes())
-        {
-            if(this.getOriginal(key) != 'undefined') {
-                this._.attributes[key] = this.getOriginal(key);
-            } else {
-                delete this._.attributes[key];
+        // Reset all pre-defined attributes.
+        for (let key in this._.attributes) {
+            if (this._.attributes.hasOwnProperty(key)) {
+                if(this.hasOriginal(key)) {
+                    this._.attributes[key] = this.getOriginal(key);
+                } else {
+                    delete this._.attributes[key];
+                }
+            }
+        }
+        // Reset all dynamically defined attributes.
+        for (let key in this) {
+            if (key !== '_' && this.hasOwnProperty(key)) {
+                delete this[key];
             }
         }
     }

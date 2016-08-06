@@ -328,7 +328,32 @@ suite('Model', function() {
     });
 
     // RESET
-    // @TODO Test that reset, resets dynamic attributes
+    test('test_reset_works_on_attributes', function () {
+        let attributes = {
+            id: 1,
+            first_name: 'Marcus',
+            last_name: 'Turner',
+            age: 24,
+        };
+        let model = new Model(attributes);
+        model.reset();
+        chai.assert.equal(JSON.stringify(model.dirty()),JSON.stringify({}));
+    });
+    test('test_reset_works_on_dynamic_attributes', function () {
+        let model = new Model();
+        model.id = 1;
+        model.first_name = 'Marcus';
+        model.last_name = 'Turner';
+        model.age = 24;
+        model.reset();
+        chai.assert.equal(JSON.stringify(model.dirty()),JSON.stringify({}));
+    });
+    test('test_reset_works_on_dynamic_attributes_prefixed_with_an_underscore', function () {
+        let model = new Model();
+        model._id = 1;
+        model.reset();
+        chai.assert.equal(JSON.stringify(model.dirty()),JSON.stringify({}));
+    });
 });
 
 suite('Builder', function() {
