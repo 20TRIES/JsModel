@@ -3,6 +3,7 @@ import ModelCollection from "./ModelCollection";
 import clone  from 'clone';
 import Moment from 'moment/moment';
 import Str from 'string';
+import InvalidAttributeException from "./Exceptions/InvalidAttributeException";
 
 /**
  * A base Model class.
@@ -46,6 +47,18 @@ export default class Model {
      */
     _hydrate(attributes)
     {
+        // Define any attributes which are required by accessors / mutators and which do not already
+        // exist within the attributes provided.
+        for(let key in this) {
+            if((key.slice(0,3) === 'get' || key.slice(0,3) === 'set')
+                && key.slice(-9) === 'Attribute' && this[key] instanceof Function) {
+                let attribute = new Str(key.slice(3, -9)).underscore();
+                if(!attribute.isEmpty() && typeof attributes[attribute] === 'undefined') {
+                    attributes[attribute] = null;
+                }
+            }
+        }
+
         // Initialise the attribute values.
         for(let key in attributes) {
             this._attributes[key] = attributes[key];
@@ -54,9 +67,9 @@ export default class Model {
             }
         }
 
-        // Define accessors and mutators
+        // Define accessors and mutators for pre-defined attributes.
         let properties = {};
-        for(let key in attributes) {
+        for(let key in this._attributes) {
             let accessor = this[new Str(`get_${key}_attribute`).camelize()];
             let mutator = this[new Str(`set_${key}_attribute`).camelize()];
             if(this._dates.indexOf(key) != -1) {
@@ -90,12 +103,41 @@ export default class Model {
     getAttributes()
     {
         let attributes = {};
+        // Get all pre-defined attributes.
         for(let key in this._attributes) {
             if(this._attributes.hasOwnProperty(key)) {
                 attributes[key] = this[key];
             }
         }
+        // Get all dynamically defined attributes.
+        for(let key in this) {
+            if(this.hasOwnProperty(key) && key.slice(0,1) != '_') {
+                attributes[key] = this[key];
+            }
+        }
         return attributes;
+    }
+
+    /**
+     * Gets an attribute from a model.
+     *
+     * @param {string} name
+     * @returns {*}
+     */
+    getAttribute(name)
+    {
+        return typeof this._attributes[name] === 'undefined' ? this[name] : this._attributes[name];
+    }
+
+    /**
+     * Gets the original value of a model attribute.
+     *
+     * @param {string} name
+     * @returns {*}
+     */
+    getOriginal(name)
+    {
+        return this._original[name];
     }
 
     /**
@@ -200,12 +242,12 @@ export default class Model {
      * @returns Object
      */
     dirty() {
-        var dirty = {};
-        for(var key in this._attributes) {
-            var value = this._attributes[key];
-            if(value != this._original[key]) {
+        let dirty = {};
+        for(let key in this.getAttributes()) {
+            let value = this.getAttribute(key);
+            if(value != this.getOriginal(key)) {
                 if(value != null && typeof value === 'object') {
-                    dirty[key] = jQuery.extend({}, this._attributes[key]);
+                    dirty[key] = this.getAttribute(key);
                 } else {
                     dirty[key] = value;
                 }
@@ -225,12 +267,14 @@ export default class Model {
         instance._syncing = true;
 
         var attributes = this.dirty();
-        attributes[this._primary_key] = this._attributes[this._primary_key];
+
+        // @TODO Next line can likely be removed
+        attributes[this._primary_key] = this.getAttribute(this._primary_key);
 
         var builder = this.query();
         if(this._exists) {
             builder
-                .where(this._primary_filter, this._attributes[this._primary_key])
+                .where(this._primary_filter, this.getAttribute(this.getPrimaryKey()))
                 .update(attributes, (function(instance, success) {
                     return function(results, payload) {
                         instance._syncing = false;
@@ -257,8 +301,9 @@ export default class Model {
         } else {
             builder.insert(attributes, function(model) {
                     instance._syncing = false;
-                    instance.customer_contact_id = model.customer_contact_id;
-                    instance._hydrate(model._attributes);
+                    // @TODO Setting primary key seperately can likely be removed
+                    // instance.customer_contact_id = model.customer_contact_id;
+                    instance._hydrate(model.getAttributes());
                     instance._exists = true;
                     if (typeof success == 'function') {
                         success();
@@ -302,11 +347,9 @@ export default class Model {
 
         instance._syncing = true;
 
-        var builder = this.query();
-
-        if(this._exists) {
-            builder
-                .where(this._primary_filter, this._attributes[this._primary_key])
+        if(this.exists()) {
+            this.query()
+                .where(this._primary_filter, this.getAttribute(this.getPrimaryKey()))
                 .delete((function(success) {
                     return function(results) {
                         instance._syncing = false;

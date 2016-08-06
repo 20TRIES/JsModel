@@ -136,8 +136,63 @@ suite('Model', function() {
         model.getAttributes().id = 0;
         chai.assert.equal(model.id, 5);
     });
+    test('test_attributes_can_be_retrieved_via_get_attribute', function() {
+        let attributes = {
+            id: 5,
+            first_name: 'Marcus',
+            last_name: 'Turner',
+            age: 24,
+        };
+        let model = new Model(attributes);
+        chai.assert.equal(model.getAttribute('first_name'), 'Marcus');
+    });
 
-    
+    // DYNAMIC ATTRIBUTES
+    test('test_dynamic_attributes_can_be_set', function () {
+        let model = new Model();
+        model.first_name = 'Marcus';
+        chai.assert.equal(model.first_name, 'Marcus');
+    });
+    test('test_dynamic_attributes_are_defined_by_accessors', function () {
+        let MockModel = class extends Model {
+            getFirstNameAttribute() {
+                return this._attributes.first_name;
+            }
+        };
+        let model = new MockModel();
+        chai.assert.equal(model.first_name, null);
+    });
+    test('test_dynamic_attributes_are_defined_by_mutators', function () {
+        let MockModel = class extends Model {
+            setFirstNameAttribute(value) {
+                this._attributes.first_name = value;
+            }
+        };
+        let model = new MockModel();
+        chai.assert.equal(model.first_name, null);
+    });
+    test('test_dynamic_attributes_are_retrieved_by_get_attributes', function () {
+        let model = new Model();
+        model.first_name = 'Marcus';
+        chai.assert.equal(model.getAttributes().first_name, 'Marcus');
+    });
+    test('test_dynamic_attributes_can_be_retrieved_via_get_attribute', function() {
+        let model = new Model();
+        model.first_name = 'Marcus';
+        chai.assert.equal(model.getAttribute('first_name'), 'Marcus');
+    });
+    test('test_dynamic_attributes_are_shown_as_dirty', function () {
+        let model = new Model();
+        model.id = 1;
+        model.first_name = 'Marcus';
+        model.last_name = 'Turner';
+        chai.assert.equal(JSON.stringify(model.dirty()), JSON.stringify({
+            id: 1,
+            first_name: 'Marcus',
+            last_name: 'Turner',
+        }));
+    });
+
     // ATTRIBUTE MUTATORS
     test('test_attributes_can_be_set_to_a_model', function () {
         let MockDateMutatingModel = class extends Model {
@@ -259,6 +314,9 @@ suite('Model', function() {
         clone._attributes.mock_attr = "other_mock_value";
         chai.assert.equal("mock_value", model._attributes.mock_attr);
     });
+
+    // RESET
+    // @TODO Test that reset, resets dynamic attributes
 });
 
 suite('Builder', function() {
