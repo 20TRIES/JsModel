@@ -73,7 +73,7 @@ suite('Model', function() {
     });
 
 
-    // ATTRIBUTE ACCESSORS
+    // ATTRIBUTE ACCESS
     test('test_attributes_can_be_gotten_from_a_model', function () {
         let MockDateMutatingModel = class extends Model {};
         let model = new MockDateMutatingModel({
@@ -193,7 +193,7 @@ suite('Model', function() {
         }));
     });
 
-    // ATTRIBUTE MUTATORS
+    // ATTRIBUTE SETTING
     test('test_attributes_can_be_set_to_a_model', function () {
         let MockDateMutatingModel = class extends Model {
             constructor(data = {}) {
