@@ -16,14 +16,14 @@ export default class Model {
      */
     constructor(data = {})
     {
-        this._url = '/';
-        this._primary_key = 'id';
-        this._primary_filter = 'id';
-        this._original = {};
-        this._attributes = {};
-        this._syncing = false;
-        this._exists = false;
-        this._dates = typeof this._dates == 'undefined' ? ['created_at', 'updated_at'] : this._dates;
+        this._ = {};
+        this._.url = '/';
+        this._.primary_key = 'id';
+        this._.primary_filter = 'id';
+        this._.original = {};
+        this._.attributes = {};
+        this._.syncing = false;
+        this._.exists = false;
         this._hydrate(data);
     }
 
@@ -61,35 +61,41 @@ export default class Model {
 
         // Initialise the attribute values.
         for(let key in attributes) {
-            this._attributes[key] = attributes[key];
-            if (this._exists) {
-                this._original[key] = attributes[key];
+            if(key === '_') {
+                // Attributes must not be named underscore; this is intended to stop interference with existing private
+                // model attributes.
+                throw new InvalidAttributeException(`Invalid attribute name: "${key}"!`);
+            }
+            this._.attributes[key] = attributes[key];
+            if (this.exists()) {
+                this._.original[key] = attributes[key];
             }
         }
 
         // Define accessors and mutators for pre-defined attributes.
         let properties = {};
-        for(let key in this._attributes) {
+        let dates = this.getDates();
+        for(let key in this._.attributes) {
             let accessor = this[new Str(`get_${key}_attribute`).camelize()];
             let mutator = this[new Str(`set_${key}_attribute`).camelize()];
-            if(this._dates.indexOf(key) != -1) {
+            if(dates.indexOf(key) != -1) {
                 properties[key] = {
                     "configurable": true,
                     "get": accessor instanceof Function ? accessor : ((attribute_name) => {
-                        return new Moment(this._attributes[attribute_name]);
+                        return new Moment(this._.attributes[attribute_name]);
                     }).bind(this, [key]),
                     "set": mutator instanceof Function ? mutator : (value) => {
-                        this._attributes[key] = value instanceof Moment ? value.format() : value;
+                        this._.attributes[key] = value instanceof Moment ? value.format() : value;
                     }
                 };
             } else {
                 properties[key] = {
                     "configurable": true,
                     "get": accessor instanceof Function ? accessor : ((attribute_name) => {
-                        return this._attributes[attribute_name];
+                        return this._.attributes[attribute_name];
                     }).bind(this, [key]),
                     "set": (mutator instanceof Function ? mutator : (value) => {
-                        this._attributes[key] = value;
+                        this._.attributes[key] = value;
                     }),
                 };
             }
@@ -104,14 +110,14 @@ export default class Model {
     {
         let attributes = {};
         // Get all pre-defined attributes.
-        for(let key in this._attributes) {
-            if(this._attributes.hasOwnProperty(key)) {
+        for(let key in this._.attributes) {
+            if(this._.attributes.hasOwnProperty(key)) {
                 attributes[key] = this[key];
             }
         }
         // Get all dynamically defined attributes.
         for(let key in this) {
-            if(this.hasOwnProperty(key) && key.slice(0,1) != '_') {
+            if(key != '_' && this.hasOwnProperty(key)) {
                 attributes[key] = this[key];
             }
         }
@@ -126,7 +132,7 @@ export default class Model {
      */
     getAttribute(name)
     {
-        return typeof this._attributes[name] === 'undefined' ? this[name] : this._attributes[name];
+        return typeof this._.attributes[name] === 'undefined' ? this[name] : this._.attributes[name];
     }
 
     /**
@@ -137,7 +143,17 @@ export default class Model {
      */
     getOriginal(name)
     {
-        return this._original[name];
+        return this._.original[name];
+    }
+
+    /**
+     * Gets the names of the attributes within a model that have been specified as a date attribute.
+     *
+     * @returns {Array}
+     */
+    getDates()
+    {
+        return ['created_at', 'updated_at'];
     }
 
     /**
@@ -147,7 +163,7 @@ export default class Model {
      */
     isSyncing()
     {
-        return this._syncing === true;
+        return this._.syncing === true;
     }
 
     /**
@@ -157,7 +173,7 @@ export default class Model {
      */
     getUrl()
     {
-        return this._url;
+        return this._.url;
     }
 
     /**
@@ -165,7 +181,7 @@ export default class Model {
      */
     exists()
     {
-        return this._exists === true;
+        return this._.exists === true;
     }
 
     /**
@@ -175,7 +191,7 @@ export default class Model {
      */
     getPrimaryKey()
     {
-        return this._primary_key;
+        return this._.primary_key;
     }
 
     /**
@@ -214,7 +230,7 @@ export default class Model {
      * @returns {ModelCollection}
      */
     find(id, success, error) {
-        return this.where(this._primary_key, id).first(success, error);
+        return this.where(this.getPrimaryKey(), id).first(success, error);
     }
 
     /**
@@ -237,7 +253,7 @@ export default class Model {
     }
 
     /**
-     * Gets the _attributes of a model that have been changed.
+     * Gets the attributes of a model that have been changed.
      *
      * @returns Object
      */
@@ -264,24 +280,24 @@ export default class Model {
      */
     save(success, error) {
         var instance = this;
-        instance._syncing = true;
+        instance._.syncing = true;
 
         var attributes = this.dirty();
 
         // @TODO Next line can likely be removed
-        attributes[this._primary_key] = this.getAttribute(this._primary_key);
+        attributes[this.getPrimaryKey()] = this.getAttribute(this.getPrimaryKey());
 
         var builder = this.query();
-        if(this._exists) {
+        if(this.exists()) {
             builder
-                .where(this._primary_filter, this.getAttribute(this.getPrimaryKey()))
+                .where(this._.primary_filter, this.getAttribute(this.getPrimaryKey()))
                 .update(attributes, (function(instance, success) {
                     return function(results, payload) {
-                        instance._syncing = false;
+                        instance._.syncing = false;
                         for(var key in results.items) {
                             var updated_contact = results.items[key];
                             if(updated_contact.customer_contact_id == instance.customer_contact_id) {
-                                instance._hydrate(updated_contact._attributes);
+                                instance._hydrate(updated_contact.getAttributes());
                             }
                         }
                         if(typeof success == 'function') {
@@ -291,7 +307,7 @@ export default class Model {
                 })(this, success), (function(instance, error) {
                     return function (response, code) {
                         if (code == 422) {
-                            instance._syncing = false;
+                            instance._.syncing = false;
                         }
                         if (typeof error == 'function') {
                             error(response, code);
@@ -300,18 +316,18 @@ export default class Model {
                 })(this, error));
         } else {
             builder.insert(attributes, function(model) {
-                    instance._syncing = false;
+                    instance._.syncing = false;
                     // @TODO Setting primary key seperately can likely be removed
                     // instance.customer_contact_id = model.customer_contact_id;
                     instance._hydrate(model.getAttributes());
-                    instance._exists = true;
+                    instance._.exists = true;
                     if (typeof success == 'function') {
                         success();
                     }
                 },
                 function(response, code) {
                     if(code == 422) {
-                        instance._syncing = false;
+                        instance._.syncing = false;
                     }
                     if(typeof error == 'function') {
                         error(response, code);
@@ -321,16 +337,16 @@ export default class Model {
     }
 
     /**
-     * Resets a models _attributes to their _original values.
+     * Resets a models attributes to their original values.
      */
     reset()
     {
-        for(var key in this._attributes)
+        for(var key in this.getAttributes())
         {
-            if(this._original[key] != 'undefined') {
-                this._attributes[key] = this._original[key];
+            if(this.getOriginal(key) != 'undefined') {
+                this._.attributes[key] = this.getOriginal(key);
             } else {
-                delete this._attributes[key];
+                delete this._.attributes[key];
             }
         }
     }
@@ -345,23 +361,23 @@ export default class Model {
     {
         var instance = this;
 
-        instance._syncing = true;
+        instance._.syncing = true;
 
         if(this.exists()) {
             this.query()
-                .where(this._primary_filter, this.getAttribute(this.getPrimaryKey()))
+                .where(this._.primary_filter, this.getAttribute(this.getPrimaryKey()))
                 .delete((function(success) {
                     return function(results) {
-                        instance._syncing = false;
-                        instance._hydrate(results.first()._attributes);
+                        instance._.syncing = false;
+                        instance._hydrate(results.first().getAttributes());
                         if(typeof success == 'function') {
                             success();
                         }
                     }
-                })(this._attributes, success), (function(error) {
+                })(this.getAttributes(), success), (function(error) {
                     return function (response, code) {
                         if (code == 422 || code == 403) {
-                            instance._syncing = false;
+                            instance._.syncing = false;
                             instance.reset();
                         }
                         if (typeof error == 'function') {
@@ -378,10 +394,10 @@ export default class Model {
      * @returns {Model}
      */
     clone() {
-        let cloned_model = new this.constructor(clone(this._attributes));
-        cloned_model._original = clone(this._original);
-        cloned_model._syncing = this._syncing;
-        cloned_model._exists = this._exists;
+        let cloned_model = new this.constructor(clone(this.getAttributes()));
+        cloned_model._.original = clone(this._.original);
+        cloned_model._.syncing = this.isSyncing();
+        cloned_model._.exists = this.exists();
         return cloned_model;
     }
 }
