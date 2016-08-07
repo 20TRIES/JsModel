@@ -195,15 +195,26 @@ suite('Model', function() {
     });
 
     // ATTRIBUTE SETTING
-    test('test_attributes_can_be_set_to_a_model', function () {
-        let MockDateMutatingModel = class extends Model {
-            constructor(data = {}) {
-                super(data);
-            }
-        };
-        let model = new MockDateMutatingModel({foo: 989});
-        model.foo = 77;
-        chai.assert.equal(model.foo, 77);
+    test('test_attributes_can_be_set_to_a_model_through_constructor', function () {
+        let MockDateMutatingModel = class extends Model {};
+        let model = new MockDateMutatingModel({
+            foo: 500,
+            bar: 1000,
+            baz: 99,
+        });
+        chai.assert.equal(model.foo, 500);
+        chai.assert.equal(model.bar, 1000);
+        chai.assert.equal(model.baz, 99);
+    });
+    test('test_attributes_can_be_dynamically_set_to_a_model', function () {
+        let MockDateMutatingModel = class extends Model {};
+        let model = new MockDateMutatingModel();
+        model.foo = 500;
+        model.bar = 1000;
+        model.baz = 99;
+        chai.assert.equal(model.foo, 500);
+        chai.assert.equal(model.bar, 1000);
+        chai.assert.equal(model.baz, 99);
     });
     test('test_attempting_to_override_existing_private_attribute_wrapper_during_construction_causes_exception', function () {
         chai.assert.throws(() => {
