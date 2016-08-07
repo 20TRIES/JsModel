@@ -75,7 +75,17 @@ suite('Model', function() {
 
 
     // ATTRIBUTE ACCESS
-    test('test_attributes_can_be_gotten_from_a_model', function () {
+    test('test_attributes_can_be_dynamically_set_to_a_model', function () {
+        let MockDateMutatingModel = class extends Model {};
+        let model = new MockDateMutatingModel();
+        model.foo = 500;
+        model.bar = 1000;
+        model.baz = 99;
+        chai.assert.equal(model.foo, 500);
+        chai.assert.equal(model.bar, 1000);
+        chai.assert.equal(model.baz, 99);
+    });
+    test('test_attributes_can_be_gotten_from_a_model_via_default_accessors', function () {
         let MockDateMutatingModel = class extends Model {};
         let model = new MockDateMutatingModel({
             id: 5,
@@ -88,18 +98,6 @@ suite('Model', function() {
         chai.assert.equal(model.last_name, "Turner");
         chai.assert.equal(model.age, 24);
     });
-    test('test_accessor_can_be_defined', function () {
-        let MockDateMutatingModel = class extends Model {
-            constructor(data = {}) {
-                super(data);
-            }
-            getFooAttribute() {
-                return 'foo';
-            }
-        };
-        let model = new MockDateMutatingModel({foo: 'bar'});
-        chai.assert.equal(model.foo, 'foo');
-    });
     test('test_get_attributes_returns_all_attributes', function() {
         let attributes = {
             id: 5,
@@ -109,22 +107,6 @@ suite('Model', function() {
         };
         let model = new Model(attributes);
         chai.assert.equal(JSON.stringify(model.getAttributes()), JSON.stringify(attributes));
-    });
-    test('test_get_attributes_returns_mutated_values', function() {
-        let attributes = {
-            id: 5,
-            first_name: "marcus",
-            last_name: "Turner",
-            age: 24,
-        };
-        let MockDateMutatingModel = class extends Model {
-            getFirstNameAttribute() {
-                return new Str(this._.attributes.first_name).capitalize().toString();
-            }
-        };
-        let model = new MockDateMutatingModel(attributes);
-        let model_attributes = model.getAttributes();
-        chai.assert.equal(model_attributes.first_name, 'Marcus');
     });
     test('test_attributes_cannot_be_changed_through_results_of_get_attributes', function() {
         let attributes = {
@@ -147,30 +129,94 @@ suite('Model', function() {
         let model = new Model(attributes);
         chai.assert.equal(model.getAttribute('first_name'), 'Marcus');
     });
-
-    // DYNAMIC ATTRIBUTES
-    test('test_dynamic_attributes_can_be_set', function () {
-        let model = new Model();
-        model.first_name = 'Marcus';
-        chai.assert.equal(model.first_name, 'Marcus');
-    });
-    test('test_dynamic_attributes_are_defined_by_accessors', function () {
+    test('test_accessors_are_defined_during_construction', function () {
         let MockModel = class extends Model {
             getFirstNameAttribute() {
-                return this._.attributes.first_name;
+                let name = new Str(this._.attributes.first_name);
+                return name.isEmpty() ? '' : name.capitalize().toString();
+            }
+            getLastNameAttribute() {
+                let name = new Str(this._.attributes.last_name);
+                return name.isEmpty() ? '' : name.capitalize().toString();
             }
         };
         let model = new MockModel();
-        chai.assert.equal(model.first_name, null);
+        model.first_name = 'foo';
+        model.last_name = 'bar';
+        chai.assert.equal(model.first_name, 'Foo');
+        chai.assert.equal(model.last_name, 'Bar');
     });
-    test('test_dynamic_attributes_are_defined_by_mutators', function () {
+    test('test_construction_does_not_define_attributes_indicated_by_accessors', function () {
+        let MockModel = class extends Model {
+            getFirstNameAttribute() {
+                let name = new Str(this._.attributes.first_name);
+                return name.isEmpty() ? '' : name.capitalize().toString();
+            }
+            getLastNameAttribute() {
+                let name = new Str(this._.attributes.last_name);
+                return name.isEmpty() ? '' : name.capitalize().toString();
+            }
+        };
+        let model = new MockModel();
+        chai.assert.isUndefined(model._.attributes.first_name);
+        chai.assert.isUndefined(model._.attributes.last_name);
+        chai.assert.deepEqual(model.dirty(), {});
+    });
+    test('test_mutators_are_defined_during_construction', function () {
         let MockModel = class extends Model {
             setFirstNameAttribute(value) {
-                this._.attributes.first_name = value;
+                this._.attributes.first_name = (new Str(value)).capitalize().toString();
+            }
+            setLastNameAttribute(value) {
+                this._.attributes.last_name = (new Str(value)).capitalize().toString();
             }
         };
         let model = new MockModel();
-        chai.assert.equal(model.first_name, null);
+        model.first_name = 'foo';
+        model.last_name = 'bar';
+        chai.assert.equal(model.first_name, 'Foo');
+        chai.assert.equal(model.last_name, 'Bar');
+    });
+    test('test_construction_does_not_define_attributes_indicated_by_mutators', function () {
+        let MockModel = class extends Model {
+            setFirstNameAttribute(value) {
+                this._.attributes.first_name = (new Str(value)).capitalize().toString();
+            }
+            setLastNameAttribute(value) {
+                this._.attributes.last_name = (new Str(value)).capitalize().toString();
+            }
+        };
+        let model = new MockModel();
+        chai.assert.isUndefined(model._.attributes.first_name);
+        chai.assert.isUndefined(model._.attributes.last_name);
+        chai.assert.deepEqual(model.dirty(), {});
+    });
+    test('test_mutators_are_applied_to_data_passed_to_constructor', function () {
+        let MockDateMutatingModel = class extends Model {
+            setFooAttribute(val) {
+                this._.attributes.foo = 'foo';
+            }
+            setBarAttribute(val) {
+                this._.attributes.bar = 'bar';
+            }
+        };
+        let model = new MockDateMutatingModel({foo: 2, bar: 4});
+        chai.assert.equal(model.foo, 'foo');
+        chai.assert.equal(model.bar, 'bar');
+    });
+    test('test_hydrate_does_not_apply_mutators_to_attribute_values', function () {
+        let MockDateMutatingModel = class extends Model {
+            setFooAttribute(val) {
+                this._.attributes.foo = 'foo';
+            }
+            setBarAttribute(val) {
+                this._.attributes.bar = 'bar';
+            }
+        };
+        let model = new MockDateMutatingModel();
+        model._hydrate({foo: 2, bar: 4});
+        chai.assert.equal(model.foo, 2);
+        chai.assert.equal(model.bar, 4);
     });
     test('test_dynamic_attributes_are_retrieved_by_get_attributes', function () {
         let model = new Model();
@@ -181,6 +227,11 @@ suite('Model', function() {
         let model = new Model();
         model.first_name = 'Marcus';
         chai.assert.equal(model.getAttribute('first_name'), 'Marcus');
+    });
+    test('test_dynamically_set_private_attributes_are_included_in_get_attributes', function () {
+        let model = new Model();
+        model._foo = 'bar';
+        chai.assert.equal(JSON.stringify(model.getAttributes()), JSON.stringify({'_foo': 'bar'}));
     });
     test('test_dynamic_attributes_are_shown_as_dirty', function () {
         let model = new Model();
@@ -193,56 +244,15 @@ suite('Model', function() {
             last_name: 'Turner',
         }));
     });
-
-    // ATTRIBUTE SETTING
-    test('test_attributes_can_be_set_to_a_model_through_constructor', function () {
-        let MockDateMutatingModel = class extends Model {};
-        let model = new MockDateMutatingModel({
-            foo: 500,
-            bar: 1000,
-            baz: 99,
-        });
-        chai.assert.equal(model.foo, 500);
-        chai.assert.equal(model.bar, 1000);
-        chai.assert.equal(model.baz, 99);
-    });
-    test('test_attributes_can_be_dynamically_set_to_a_model', function () {
-        let MockDateMutatingModel = class extends Model {};
-        let model = new MockDateMutatingModel();
-        model.foo = 500;
-        model.bar = 1000;
-        model.baz = 99;
-        chai.assert.equal(model.foo, 500);
-        chai.assert.equal(model.bar, 1000);
-        chai.assert.equal(model.baz, 99);
-    });
-    test('test_attempting_to_override_existing_private_attribute_wrapper_during_construction_causes_exception', function () {
-        chai.assert.throws(() => {
-            new Model({'_': 5});
-        }, InvalidAttributeException);
-    });
-    test('test_dynamically_set_private_attributes_are_included_in_get_attributes', function () {
-        let model = new Model();
-        model._foo = 'bar';
-        chai.assert.equal(JSON.stringify(model.getAttributes()), JSON.stringify({'_foo': 'bar'}));
-    });
     test('test_dynamically_set_private_attributes_are_included_in_dirty_attributes', function () {
         let model = new Model();
         model._foo = 'bar';
         chai.assert.equal(JSON.stringify(model.dirty()), JSON.stringify({'_foo': 'bar'}));
     });
-    test('test_mutator_can_be_defined', function () {
-        let MockDateMutatingModel = class extends Model {
-            constructor(data = {}) {
-                super(data);
-            }
-            setFooAttribute(value) {
-                this._.attributes.foo = value;
-            }
-        };
-        let model = new MockDateMutatingModel({foo: 'bar'});
-        model.foo = 'foo';
-        chai.assert.equal(model.foo, 'foo');
+    test('test_attempting_to_override_existing_private_attribute_wrapper_during_construction_causes_exception', function () {
+        chai.assert.throws(() => {
+            new Model({'_': 5});
+        }, InvalidAttributeException);
     });
 
 
@@ -318,24 +328,11 @@ suite('Model', function() {
 
     // CLONE
     test('test_clone_method', function () {
-        let mock_attributes = {"mock_attr": "mock_value"};
-        let model = new Model(mock_attributes);
+        let model = new Model({"mock_attr": "mock_value"});
         model._.exists = true;
         model._.syncing = true;
         model._.original = 'mock_orginal';
-        let clone = model.clone();
-        chai.assert.equal(true, clone.isSyncing());
-        chai.assert.equal(JSON.stringify(mock_attributes), JSON.stringify(clone._.attributes));
-        chai.assert.equal("mock_value", clone["mock_attr"]);
-        chai.assert.equal(true, clone.exists());
-        chai.assert.equal('mock_orginal', clone._.original);
-    });
-    test('test_clone_deep_clones', function () {
-        let mock_attributes = {mock_attr: "mock_value"};
-        let model = new Model(mock_attributes);
-        let clone = model.clone();
-        clone._.attributes.mock_attr = "other_mock_value";
-        chai.assert.equal("mock_value", model._.attributes.mock_attr);
+        chai.assert.deepEqual(model.clone(), model);
     });
 
     // RESET
@@ -364,6 +361,40 @@ suite('Model', function() {
         model._id = 1;
         model.reset();
         chai.assert.equal(JSON.stringify(model.dirty()),JSON.stringify({}));
+    });
+
+    // FILL
+    test('test_fill', function () {
+        let model = new Model();
+        model.fill({
+            id: 1,
+            first_name: 'Marcus',
+            last_name: 'Turner',
+            age: 24,
+        });
+        chai.assert.deepEqual(model.getAttributes(), {
+            id: 1,
+            first_name: 'Marcus',
+            last_name: 'Turner',
+            age: 24,
+        });
+        chai.assert.deepEqual(model.dirty(), {
+            id: 1,
+            first_name: 'Marcus',
+            last_name: 'Turner',
+            age: 24,
+        });
+    });
+    test('test_fill_throw_invalid_argument_exception_if_attribute_is_named_underscore', function () {
+        chai.assert.throws(() => {
+            let model = new Model();
+            model.fill({
+                _: 1,
+                first_name: 'Marcus',
+                last_name: 'Turner',
+                age: 24,
+            });
+        }, InvalidAttributeException);
     });
 });
 

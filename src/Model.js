@@ -12,9 +12,9 @@ export default class Model {
     /**
      * Constructor
      *
-     * @param {Object} [data={}]
+     * @param {Object} [attributes={}]
      */
-    constructor(data = {})
+    constructor(attributes = {})
     {
         this._ = {};
         this._.url = '/';
@@ -24,7 +24,35 @@ export default class Model {
         this._.attributes = {};
         this._.syncing = false;
         this._.exists = false;
-        this._hydrate(data);
+
+        // Initialise date attributes
+        this.getDates().forEach((value) => {
+            Object.defineProperty(this, value, {
+                "configurable": true,
+                "get": this._getAccessor(value),
+                "set": this._getMutator(value)
+            });
+        }, this);
+
+        // Define any attributes which are required by accessors / mutators and which do not already
+        // exist within the attributes provided.
+        for(let key in this) {
+            if((key.slice(0,3) === 'get' || key.slice(0,3) === 'set')
+                && key.slice(-9) === 'Attribute' && this[key] instanceof Function) {
+                let attribute = new Str(key.slice(3, -9)).underscore();
+                if(!attribute.isEmpty()) {
+                    attribute = attribute.toString();
+                    Object.defineProperty(this, attribute, {
+                        "configurable": true,
+                        "get": this._getAccessor(attribute),
+                        "set": this._getMutator(attribute)
+                    });
+                }
+            }
+        }
+
+        // Fill the model with the data provided.
+        this.fill(attributes);
     }
 
     /**
@@ -40,25 +68,32 @@ export default class Model {
     }
 
     /**
-     * Hydrates a new model instance with a set of data.
+     * Sets the attributes of a model from a given set of data.
+     *
+     * Any attributes are not defined prior to this method being called will be dynamically added to the model.
+     *
+     * @param {{}} attributes
+     */
+    fill(attributes)
+    {
+        for (let key in attributes) {
+            if (key === '_') {
+                // Attributes must not be named underscore; this is intended to stop interference with existing private
+                // model attributes.
+                throw new InvalidAttributeException(`Invalid attribute name: "${key}"!`);
+            }
+            this[key] = attributes[key];
+        }
+    }
+
+    /**
+     * Hydrates a new model instance with a set of data from the server.
      *
      * @param {{}} attributes
      * @private
      */
     _hydrate(attributes)
     {
-        // Define any attributes which are required by accessors / mutators and which do not already
-        // exist within the attributes provided.
-        for(let key in this) {
-            if((key.slice(0,3) === 'get' || key.slice(0,3) === 'set')
-                && key.slice(-9) === 'Attribute' && this[key] instanceof Function) {
-                let attribute = new Str(key.slice(3, -9)).underscore();
-                if(!attribute.isEmpty() && typeof attributes[attribute] === 'undefined') {
-                    attributes[attribute] = null;
-                }
-            }
-        }
-
         // Initialise the attribute values.
         for(let key in attributes) {
             if(key === '_') {
@@ -72,35 +107,59 @@ export default class Model {
             }
         }
 
-        // Define accessors and mutators for pre-defined attributes.
-        let properties = {};
-        let dates = this.getDates();
+        // Define accessors and mutators for constructed attributes.
         for(let key in this._.attributes) {
-            let accessor = this[new Str(`get_${key}_attribute`).camelize()];
-            let mutator = this[new Str(`set_${key}_attribute`).camelize()];
-            if(dates.indexOf(key) != -1) {
-                properties[key] = {
-                    "configurable": true,
-                    "get": accessor instanceof Function ? accessor : ((attribute_name) => {
-                        return new Moment(this._.attributes[attribute_name]);
-                    }).bind(this, [key]),
-                    "set": mutator instanceof Function ? mutator : (value) => {
-                        this._.attributes[key] = value instanceof Moment ? value.format() : value;
-                    }
-                };
-            } else {
-                properties[key] = {
-                    "configurable": true,
-                    "get": accessor instanceof Function ? accessor : ((attribute_name) => {
-                        return this._.attributes[attribute_name];
-                    }).bind(this, [key]),
-                    "set": (mutator instanceof Function ? mutator : (value) => {
-                        this._.attributes[key] = value;
-                    }),
-                };
-            }
+            Object.defineProperty(this, key, {
+                "configurable": true,
+                "get": this._getAccessor(key),
+                "set": this._getMutator(key)
+            });
         }
-        Object.defineProperties(this, properties);
+
+        // Set the model as existing.
+        this._.exists = true;
+    }
+
+    /**
+     * Gets the accessor method for a model attribute.
+     *
+     * @param {String} attribute_name
+     * @private
+     */
+    _getAccessor(attribute_name)
+    {
+        let method = new Str(`get_${attribute_name}_attribute`).camelize().toString();
+        let accessor = this[method];
+        if(!(accessor instanceof Function)) {
+            accessor = this.getDates().indexOf(attribute_name) === -1
+                ? (name, value) => this._.attributes[name]
+                : (name, value) => this._.attributes[name] === undefined ? null : new Moment(this._.attributes[name]);
+            accessor = accessor.bind(this, attribute_name);
+        } else {
+            accessor = accessor.bind(this);
+        }
+        return accessor;
+    }
+
+    /**
+     * Gets the mutator method for a model attribute.
+     *
+     * @param {String} attribute_name
+     * @private
+     */
+    _getMutator(attribute_name)
+    {
+        let method = new Str(`set_${attribute_name}_attribute`).camelize().toString();
+        let mutator = this[method];
+        if(!(mutator instanceof Function)) {
+            mutator = this.getDates().indexOf(attribute_name) === -1
+                ? (name, value) => { this._.attributes[name] = value }
+                : (name, value) => { this._.attributes[name] = value instanceof Moment ? value.format() : value };
+            mutator = mutator.bind(this, attribute_name);
+        } else {
+            mutator = mutator.bind(this);
+        }
+        return mutator;
     }
 
     /**
