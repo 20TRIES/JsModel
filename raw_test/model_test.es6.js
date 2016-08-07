@@ -23,7 +23,7 @@ suite('Model', function() {
             last_name: "Turner",
             age: 24,
         };
-        chai.assert.equal(JSON.stringify((new Model(attributes)).getAttributes()), JSON.stringify(attributes));
+        chai.assert.deepEqual((new Model(attributes)).getAttributes(), attributes);
     });
 
     // SYNCHRONIZATION
@@ -70,7 +70,7 @@ suite('Model', function() {
             age: 24,
         };
         let model = new Model(attributes);
-        chai.assert.equal(JSON.stringify(model.dirty()), JSON.stringify(attributes));
+        chai.assert.deepEqual(model.dirty(), attributes);
     });
 
 
@@ -106,7 +106,7 @@ suite('Model', function() {
             age: 24,
         };
         let model = new Model(attributes);
-        chai.assert.equal(JSON.stringify(model.getAttributes()), JSON.stringify(attributes));
+        chai.assert.deepEqual(model.getAttributes(), attributes);
     });
     test('test_attributes_cannot_be_changed_through_results_of_get_attributes', function() {
         let attributes = {
@@ -231,23 +231,23 @@ suite('Model', function() {
     test('test_dynamically_set_private_attributes_are_included_in_get_attributes', function () {
         let model = new Model();
         model._foo = 'bar';
-        chai.assert.equal(JSON.stringify(model.getAttributes()), JSON.stringify({'_foo': 'bar'}));
+        chai.assert.deepEqual(model.getAttributes(), {'_foo': 'bar'});
     });
     test('test_dynamic_attributes_are_shown_as_dirty', function () {
         let model = new Model();
         model.id = 1;
         model.first_name = 'Marcus';
         model.last_name = 'Turner';
-        chai.assert.equal(JSON.stringify(model.dirty()), JSON.stringify({
+        chai.assert.deepEqual(model.dirty(), {
             id: 1,
             first_name: 'Marcus',
             last_name: 'Turner',
-        }));
+        });
     });
     test('test_dynamically_set_private_attributes_are_included_in_dirty_attributes', function () {
         let model = new Model();
         model._foo = 'bar';
-        chai.assert.equal(JSON.stringify(model.dirty()), JSON.stringify({'_foo': 'bar'}));
+        chai.assert.deepEqual(model.dirty(), {'_foo': 'bar'});
     });
     test('test_attempting_to_override_existing_private_attribute_wrapper_during_construction_causes_exception', function () {
         chai.assert.throws(() => {
@@ -264,7 +264,7 @@ suite('Model', function() {
             }
         };
         let model = new MockDateMutatingModel();
-        chai.assert.equal(JSON.stringify(model.getDates()), JSON.stringify(['foo']));
+        chai.assert.deepEqual(model.getDates(), ['foo']);
     });
     test('test_dates_are_mutated_to_instances_of_moment_js', function () {
         let MockDateMutatingModel = class extends Model {
@@ -323,7 +323,7 @@ suite('Model', function() {
         let mock_direction = 'desc';
         let builder = (new Model()).orderBy(mock_attribute, mock_direction);
         chai.assert.instanceOf(builder, Builder);
-        chai.assert.equal(JSON.stringify([mock_attribute, mock_direction]), JSON.stringify(builder.orderingBy()));
+        chai.assert.deepEqual([mock_attribute, mock_direction], builder.orderingBy());
     });
 
     // CLONE
@@ -345,7 +345,7 @@ suite('Model', function() {
         };
         let model = new Model(attributes);
         model.reset();
-        chai.assert.equal(JSON.stringify(model.dirty()),JSON.stringify({}));
+        chai.assert.deepEqual(model.dirty(), {});
     });
     test('test_reset_works_on_dynamic_attributes', function () {
         let model = new Model();
@@ -354,13 +354,13 @@ suite('Model', function() {
         model.last_name = 'Turner';
         model.age = 24;
         model.reset();
-        chai.assert.equal(JSON.stringify(model.dirty()),JSON.stringify({}));
+        chai.assert.deepEqual(model.dirty(), {});
     });
     test('test_reset_works_on_dynamic_attributes_prefixed_with_an_underscore', function () {
         let model = new Model();
         model._id = 1;
         model.reset();
-        chai.assert.equal(JSON.stringify(model.dirty()),JSON.stringify({}));
+        chai.assert.deepEqual(model.dirty(), {});
     });
 
     // FILL
@@ -479,7 +479,7 @@ suite('Builder', function() {
         let mock_var_name = 'mock_var_name';
         let mock_val_1 = {"one":1, "two":2, "three":3};
         builder.append(mock_var_name, mock_val_1);
-        chai.assert.equal(JSON.stringify(mock_val_1), JSON.stringify(builder.getVariable(mock_var_name)));
+        chai.assert.deepEqual(mock_val_1, builder.getVariable(mock_var_name));
     });
     test('test_that_to_query_string_correctly_handles_appends_with_object_values', function () {
         let builder = new Builder({});
@@ -555,7 +555,7 @@ suite('Builder', function() {
         let mock_attribute = 'some_mock_attribute';
         let mock_direction = 'desc';
         builder.orderBy(mock_attribute, mock_direction);
-        chai.assert.equal(JSON.stringify([mock_attribute, mock_direction]), JSON.stringify(builder.orderingBy()));
+        chai.assert.deepEqual([mock_attribute, mock_direction], builder.orderingBy());
     });
     test('test_changes_made_to_ordering_by_result_do_not_effect_query_constraint', function () {
         let builder = new Builder({});
@@ -564,12 +564,12 @@ suite('Builder', function() {
         builder.orderBy(mock_attribute, mock_direction);
         let ordering = builder.orderingBy();
         ordering[0] = 'foo';
-        chai.assert.equal(JSON.stringify([mock_attribute, mock_direction]), JSON.stringify(builder.orderingBy()));
+        chai.assert.deepEqual([mock_attribute, mock_direction], builder.orderingBy());
     });
     test('test_order_by_returned_itself', function () {
         let builder = new Builder({});
         let result = builder.orderBy('some_mock_attribute', 'desc');
-        chai.assert.equal(JSON.stringify(builder), JSON.stringify(result));
+        chai.assert.deepEqual(builder, result);
     });
     test('test_order_by_takes_multiple_orderings', function () {
         let builder = new Builder({});
@@ -578,7 +578,7 @@ suite('Builder', function() {
         let mock_attribute_2 = 'some_mock_attribute_2';
         let mock_direction_2 = 'desc_2';
         builder.orderBy(mock_attribute_1, mock_direction_1, mock_attribute_2, mock_direction_2);
-        chai.assert.equal(JSON.stringify([mock_attribute_1, mock_direction_1, mock_attribute_2, mock_direction_2]), JSON.stringify(builder.orderingBy()));
+        chai.assert.deepEqual([mock_attribute_1, mock_direction_1, mock_attribute_2, mock_direction_2], builder.orderingBy());
     });
 
 
@@ -613,7 +613,7 @@ suite('Builder', function() {
         let mock_constraint_value = {mock: 'mock'};
         builder.where(mock_constraint_name, {mock: 'mock'});
         builder.getConstraintValue(mock_constraint_name).mock = 'not mock';
-        chai.assert.equal(JSON.stringify(builder.getConstraintValue(mock_constraint_name)), JSON.stringify(mock_constraint_value));
+        chai.assert.deepEqual(builder.getConstraintValue(mock_constraint_name), mock_constraint_value);
     });
 
     // FIRST
