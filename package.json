@@ -26,7 +26,6 @@
     "js_collection": "^0.0.*",
     "jquery": "^3.0.*",
     "clone": "^1.0.*",
-    "moment": "^2.14.*",
     "string": "^3.3.*"
   },
   "devDependencies": {

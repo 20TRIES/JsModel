@@ -8,7 +8,6 @@ import {
 } from "./Builder";
 import ModelCollection from "./ModelCollection";
 import clone  from 'clone';
-import Moment from 'moment/moment';
 import Str from 'string';
 import InvalidAttributeException from "./Exceptions/InvalidAttributeException";
 
@@ -32,14 +31,6 @@ class Model {
         this._.syncing = false;
         this._.exists = false;
 
-        // Initialise date attributes
-        this.getDates().forEach((value) => {
-            Object.defineProperty(this, value, {
-                "configurable": true,
-                "get": this._getAccessor(value),
-                "set": this._getMutator(value)
-            });
-        }, this);
         // Define any attributes which are required by accessors / mutators and which do not already
         // exist within the attributes provided.
         let keys = Object.getOwnPropertyNames(Object.getPrototypeOf(this));
@@ -137,16 +128,9 @@ class Model {
     _getAccessor(attribute_name)
     {
         let method = new Str(`get_${attribute_name}_attribute`).camelize().toString();
-        let accessor = this[method];
-        if(!(accessor instanceof Function)) {
-            accessor = this.getDates().indexOf(attribute_name) === -1
-                ? (name, value) => this._.attributes[name]
-                : (name, value) => this._.attributes[name] === undefined ? null : new Moment(this._.attributes[name]);
-            accessor = accessor.bind(this, attribute_name);
-        } else {
-            accessor = accessor.bind(this);
-        }
-        return accessor;
+        return this[method] instanceof Function
+            ? this[method].bind(this)
+            : ((name, value) => this._.attributes[name]).bind(this, attribute_name);
     }
 
     /**
@@ -158,16 +142,9 @@ class Model {
     _getMutator(attribute_name)
     {
         let method = new Str(`set_${attribute_name}_attribute`).camelize().toString();
-        let mutator = this[method];
-        if(!(mutator instanceof Function)) {
-            mutator = this.getDates().indexOf(attribute_name) === -1
-                ? (name, value) => { this._.attributes[name] = value }
-                : (name, value) => { this._.attributes[name] = value instanceof Moment ? value.format() : value };
-            mutator = mutator.bind(this, attribute_name);
-        } else {
-            mutator = mutator.bind(this);
-        }
-        return mutator;
+        return this[method] instanceof Function
+            ? this[method].bind(this)
+            : ((name, value) => { this._.attributes[name] = value }).bind(this, attribute_name);
     }
 
     /**
@@ -222,16 +199,6 @@ class Model {
     hasOriginal(name)
     {
         return typeof this._.original[name] !== 'undefined';
-    }
-
-    /**
-     * Gets the names of the attributes within a model that have been specified as a date attribute.
-     *
-     * @returns {Array}
-     */
-    getDates()
-    {
-        return ['created_at', 'updated_at'];
     }
 
     /**
