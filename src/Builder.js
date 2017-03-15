@@ -11,7 +11,7 @@ import Model from "./Model";
 /**
  * A builder class for building query strings for a Filterable API.
  */
-export default class Builder
+class Builder
 {
     /**
      * Constructor.
@@ -423,3 +423,5 @@ export default class Builder
         this._driver.execute(request);
     }
 }
+
+export {Builder, HttpDriver, HttpRequest, DuplicateVariableException, UnknownVariableException, JqueryHttpDriver};

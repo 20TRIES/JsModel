@@ -1,4 +1,11 @@
-import Builder from "./Builder";
+import {
+    Builder,
+    HttpDriver,
+    HttpRequest,
+    DuplicateVariableException,
+    UnknownVariableException,
+    JqueryHttpDriver
+} from "./Builder";
 import ModelCollection from "./ModelCollection";
 import clone  from 'clone';
 import Moment from 'moment/moment';
@@ -8,7 +15,7 @@ import InvalidAttributeException from "./Exceptions/InvalidAttributeException";
 /**
  * A base Model class.
  */
-export default class Model {
+class Model {
     /**
      * Constructor
      *
@@ -33,7 +40,6 @@ export default class Model {
                 "set": this._getMutator(value)
             });
         }, this);
-
         // Define any attributes which are required by accessors / mutators and which do not already
         // exist within the attributes provided.
         let keys = Object.getOwnPropertyNames(Object.getPrototypeOf(this));
@@ -481,3 +487,15 @@ export default class Model {
         return cloned_model;
     }
 }
+
+export {
+    Builder,
+    Model,
+    ModelCollection,
+    InvalidAttributeException,
+    HttpDriver,
+    HttpRequest,
+    DuplicateVariableException,
+    UnknownVariableException,
+    JqueryHttpDriver
+};
