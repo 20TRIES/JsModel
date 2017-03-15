@@ -2,10 +2,10 @@
   "name": "js_model",
   "version": "0.0.1",
   "description": "A simple ES6 model class.",
-  "main": "src/Model.js",
+  "main": "model.js",
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha -u 'tdd'",
-    "pretest": "./node_modules/rollup/bin/rollup -c"
+    "pretest": "./node_modules/rollup/bin/rollup -c --format cjs"
   },
   "repository": {
     "type": "git",

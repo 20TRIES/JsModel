@@ -4,8 +4,8 @@ var buble = require('rollup-plugin-buble');
 var replace = require('rollup-plugin-replace');
 
 module.exports = {
-    entry: 'raw_test/model_test.es6.js',
-    dest: 'test/model_test.js',
+    entry: 'src/Model.js',
+    dest: 'model.js',
     plugins: [
         npm({
             // use "jsnext:main" if possible
