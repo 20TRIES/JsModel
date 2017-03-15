@@ -36,7 +36,9 @@ export default class Model {
 
         // Define any attributes which are required by accessors / mutators and which do not already
         // exist within the attributes provided.
-        for(let key in this) {
+        let keys = Object.getOwnPropertyNames(Object.getPrototypeOf(this));
+        for(let i in keys) {
+            let key = keys[i];
             if((key.slice(0,3) === 'get' || key.slice(0,3) === 'set')
                 && key.slice(-9) === 'Attribute' && this[key] instanceof Function) {
                 let attribute = new Str(key.slice(3, -9)).underscore();
