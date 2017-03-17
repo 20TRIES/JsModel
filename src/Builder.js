@@ -293,7 +293,7 @@ class Builder
 
         this._constraints.each((key, constraint) => {
             query_string += (first ? '?' : '&');
-            query_string += `filters[${encodeURIComponent(constraint.filter)}][]=${encodeURIComponent(constraint.value)}`;
+            query_string += this._model.buildParameterString(constraint.filter, constraint.value);
             first = false;
         });
 

@@ -11484,12 +11484,14 @@ Builder.prototype.get = function get (success, error)
  */
 Builder.prototype.toQueryString = function toQueryString ()
 {
+        var this$1 = this;
+
     var query_string = '';
     var first = true;
 
     this._constraints.each(function (key, constraint) {
         query_string += (first ? '?' : '&');
-        query_string += "filters[" + (encodeURIComponent(constraint.filter)) + "][]=" + (encodeURIComponent(constraint.value));
+        query_string += this$1._model.buildParameterString(constraint.filter, constraint.value);
         first = false;
     });
 
@@ -11528,9 +11530,9 @@ Builder.prototype._encapsulateData = function _encapsulateData (items)
 
     for(var i=0; i < items.length; ++i) {
         items[i] = this$1.newModel(items[i]);
-        items[i]._exists = true;
+            items[i]._exists = true;
         }
-    return items;
+        return items;
 };
 
 /**
@@ -11613,8 +11615,8 @@ Builder.prototype.insert = function insert (attributes, success, error)
  *
  * @param {function} [success=() => {}]
  * @param {function} [error=() => {}]
-     */
-    Builder.prototype.deleteResults = function deleteResults (success, error)
+ */
+Builder.prototype.deleteResults = function deleteResults (success, error)
 {
         var this$1 = this;
         if ( success === void 0 ) success = function () {};
@@ -13014,13 +13016,42 @@ Model.prototype._getMutator = function _getMutator (attribute_name)
 };
 
 /**
+ * Gets a given attribute as a parameter string for a url.
+ *
+ * @param {String} name
+ * @param {*} value
+ * @return {String}
+ */
+Model.prototype.buildParameterString = function buildParameterString (name, value)
+{
+    var dynamic_method = new Str(("new_" + name + "_parameter_string")).camelize().toString();
+    return typeof this[dynamic_method] === 'function'
+        ? this[dynamic_method](value)
+        : this.newParameterString(name, value);
+};
+
+/**
+ * Creates a new URL parameter string from a given attribute name and value.
+ *
+ * This method can be overridden in order to customise the format of all parameter strings.
+ *
+ * @param {String} name
+ * @param {*} value
+ * @return {String}
+ */
+Model.prototype.newParameterString = function newParameterString (name, value)
+{
+    return ("filters[" + (encodeURIComponent(name)) + "][]=" + (encodeURIComponent(value)));
+};
+
+/**
  * Gets an object containing all attributes from a model.
  */
 Model.prototype.getAttributes = function getAttributes ()
 {
         var this$1 = this;
 
-    var attributes = {};
+        var attributes = {};
     // Get all pre-defined attributes.
     for(var key in this._.attributes) {
         if(this$1._.attributes.hasOwnProperty(key)) {
@@ -13051,7 +13082,7 @@ Model.prototype.getAttribute = function getAttribute (name)
  * Gets the original value of a model attribute.
  *
  * @param {string} name
-     * @returns {*}
+ * @returns {*}
  */
 Model.prototype.getOriginal = function getOriginal (name)
 {
@@ -13067,9 +13098,9 @@ Model.prototype.getOriginal = function getOriginal (name)
 Model.prototype.hasOriginal = function hasOriginal (name)
 {
     return typeof this._.original[name] !== 'undefined';
-};
+    };
 
-/**
+    /**
  * Determines whether a model is currently synchronizing.
  *
  * @returns {boolean}
@@ -13120,8 +13151,8 @@ Model.prototype.query = function query () {
  * Creates a new query with a data attribute appended to the query.
  */
 Model.prototype.append = function append (name, value) {
-        return this.query().append(name, value);
-    };
+    return this.query().append(name, value);
+};
 
 /**
  * Creates a builder for performing queries about a model.
@@ -13153,7 +13184,7 @@ Model.prototype.find = function find (id, success, error) {
  */
 Model.prototype.all = function all (success, error) {
     return this.query().get(success, error);
-};
+    };
 
 /**
  * Creates a new collection.
@@ -13214,7 +13245,7 @@ Model.prototype.save = function save (success, error) {
                         if(updated_contact.customer_contact_id == instance.customer_contact_id) {
                             instance._hydrate(updated_contact.getAttributes());
                         }
-                    }
+                        }
                     if(typeof success == 'function') {
                         success(results, payload);
                     }

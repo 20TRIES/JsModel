@@ -148,6 +148,35 @@ class Model {
     }
 
     /**
+     * Gets a given attribute as a parameter string for a url.
+     *
+     * @param {String} name
+     * @param {*} value
+     * @return {String}
+     */
+    buildParameterString(name, value)
+    {
+        let dynamic_method = new Str(`new_${name}_parameter_string`).camelize().toString();
+        return typeof this[dynamic_method] === 'function'
+            ? this[dynamic_method](value)
+            : this.newParameterString(name, value);
+    }
+
+    /**
+     * Creates a new URL parameter string from a given attribute name and value.
+     *
+     * This method can be overridden in order to customise the format of all parameter strings.
+     *
+     * @param {String} name
+     * @param {*} value
+     * @return {String}
+     */
+    newParameterString(name, value)
+    {
+        return `filters[${encodeURIComponent(name)}][]=${encodeURIComponent(value)}`;
+    }
+
+    /**
      * Gets an object containing all attributes from a model.
      */
     getAttributes()
